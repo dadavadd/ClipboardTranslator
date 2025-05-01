@@ -50,6 +50,8 @@ void SetConsoleLoggingOption()
             LogConfig.Configure(useConsole: false);
             break;
     }
+
+    Console.Clear();
 }
 
 
