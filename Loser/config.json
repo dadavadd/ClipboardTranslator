@@ -1,0 +1,10 @@
+{
+    "GeminiOptions": {
+        "ApiKey": "https://aistudio.google.com/apikey",
+        "ModelId": "gemini-1.5-pro"
+    },
+    "LanguagePair": {
+        "SourceLang": "Russian",
+        "TargetLang": "English"
+    }
+}

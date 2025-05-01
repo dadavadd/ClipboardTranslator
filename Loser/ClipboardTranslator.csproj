@@ -1,0 +1,69 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	  
+	  
+	<PublishAot>true</PublishAot>
+  </PropertyGroup>
+
+	<PropertyGroup>
+		<InvariantGlobalization>true</InvariantGlobalization>
+		<UseSystemResourceKeys>true</UseSystemResourceKeys>
+		<IlcGenerateStackTraceData>false</IlcGenerateStackTraceData>
+		<IlcTrimMetadata>true</IlcTrimMetadata>
+		<IlcGenerateCompleteTypeMetadata>false</IlcGenerateCompleteTypeMetadata>
+		<StackTraceSupport>false</StackTraceSupport>
+		<IlcDisableReflection>true</IlcDisableReflection>
+		<StripSymbols>true</StripSymbols>
+
+		<OptimizationPreference>Size</OptimizationPreference>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<IlcGenerateWin32Resources>false</IlcGenerateWin32Resources>
+
+		<IlcGenerateMstatFile>true</IlcGenerateMstatFile>
+		<IlcGenerateDgmlFile>true</IlcGenerateDgmlFile>
+		<IlcGenerateMetadataLog>true</IlcGenerateMetadataLog>
+		<IlcDumpGeneratedIL>true</IlcDumpGeneratedIL>
+
+		<EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>true</EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>
+
+		<SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
+		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+		<ILLinkTreatWarningsAsErrors>false</ILLinkTreatWarningsAsErrors>
+		<TrimmerSingleWarn>false</TrimmerSingleWarn>
+		<TrimmerRemoveSymbols>true</TrimmerRemoveSymbols>
+		<AutoreleasePoolSupport>false</AutoreleasePoolSupport>
+		<DebuggerSupport>false</DebuggerSupport>
+		<EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
+		<EnableUnsafeUTF7Encoding>false</EnableUnsafeUTF7Encoding>
+		<HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
+		<EventSourceSupport>false</EventSourceSupport>
+		<MetadataUpdaterSupport>false</MetadataUpdaterSupport>
+		<UseNativeHttpHandler>true</UseNativeHttpHandler>
+		<UseSystemResourceKeys>true</UseSystemResourceKeys>
+
+		<EnableCppCLIHostActivation>false</EnableCppCLIHostActivation>
+
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.183">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="config.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
+</Project>
