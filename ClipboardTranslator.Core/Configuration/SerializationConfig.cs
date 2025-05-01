@@ -1,12 +1,12 @@
 ﻿using System.Text.Json.Serialization;
-using ClipboardTranslator.Configuration;
-using ClipboardTranslator.Translator.Models.AiRequest;
-using ClipboardTranslator.Translator.Models.AiResponse;
+using ClipboardTranslator.Core.Configuration;
+using ClipboardTranslator.Core.AITranslator.Models.AiRequest;
+using ClipboardTranslator.Core.AITranslator.Models.AiResponse;
 
-namespace ClipboardTranslator.Models;
+namespace ClipboardTranslator.Core.Models;
 
 // Config
-[JsonSerializable(typeof(Config))]
+[JsonSerializable(typeof(TranslatorConfig))]
 [JsonSerializable(typeof(GeminiOptions))]
 [JsonSerializable(typeof(LanguagePair))]
 
@@ -23,4 +23,4 @@ namespace ClipboardTranslator.Models;
 [JsonSerializable(typeof(ResponsePart))]
 [JsonSerializable(typeof(UsageMetadata))]
 [JsonSerializable(typeof(PromptTokensDetail))]
-public partial class SerializationConfig : JsonSerializerContext;
+internal partial class SerializationConfig : JsonSerializerContext;

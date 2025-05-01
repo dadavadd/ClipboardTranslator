@@ -1,4 +1,5 @@
 ﻿using Windows.Win32.UI.Input.KeyboardAndMouse;
+using ClipboardTranslator.Core.Interfaces;
 using System.Runtime.CompilerServices;
 
 using static Windows.Win32.PInvoke;
@@ -6,9 +7,10 @@ using static Windows.Win32.UI.Input.KeyboardAndMouse.KEYBD_EVENT_FLAGS;
 using static Windows.Win32.UI.Input.KeyboardAndMouse.INPUT_TYPE;
 
 
-namespace ClipboardTranslator.ClipboardHandler;
 
-public class InputSimulator
+namespace ClipboardTranslator.Core.ClipboardHandler;
+
+public class InputSimulator : IInputSimulator
 {
     public bool SimulateTextInput(string text)
     {

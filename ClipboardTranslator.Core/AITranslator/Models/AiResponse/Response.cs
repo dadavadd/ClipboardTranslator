@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ClipboardTranslator.Translator.Models.AiResponse;
+namespace ClipboardTranslator.Core.AITranslator.Models.AiResponse;
 
-public record Response([property: JsonPropertyName("candidates")] Candidate[] Candidates,
+internal record Response([property: JsonPropertyName("candidates")] Candidate[] Candidates,
                        [property: JsonPropertyName("usageMetadata")] UsageMetadata UsageMetadata,
                        [property: JsonPropertyName("modelVersion")] string ModelVersion);

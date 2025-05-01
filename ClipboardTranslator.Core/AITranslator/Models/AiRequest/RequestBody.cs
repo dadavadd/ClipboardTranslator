@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ClipboardTranslator.Translator.Models.AiRequest;
+namespace ClipboardTranslator.Core.AITranslator.Models.AiRequest;
 
-public record RequestBody([property: JsonPropertyName("generationConfig")] GenerationConfig GenerationConfig,
+internal record RequestBody([property: JsonPropertyName("generationConfig")] GenerationConfig GenerationConfig,
                           [property: JsonPropertyName("contents")] RequestContent[] Contents,
                           [property: JsonPropertyName("systemInstruction")] RequestContent SystemInstruction);

@@ -1,11 +1,11 @@
 ﻿using System.Text.Json;
-using ClipboardTranslator.Models;
+using ClipboardTranslator.Core.Models;
 
-namespace ClipboardTranslator.Configuration;
+namespace ClipboardTranslator.Core.Configuration;
 
-public record Config(GeminiOptions GeminiOptions, LanguagePair LanguagePair)
+public record TranslatorConfig(GeminiOptions GeminiOptions, LanguagePair LanguagePair)
 {
-    public static Config Load()
+    public static TranslatorConfig Load()
     {
         string jsonConfigPath = Path.Combine(AppContext.BaseDirectory, "config.json");
 
@@ -14,7 +14,7 @@ public record Config(GeminiOptions GeminiOptions, LanguagePair LanguagePair)
 
         string jsonConfig = File.ReadAllText(jsonConfigPath);
 
-        var config = JsonSerializer.Deserialize(jsonConfig, SerializationConfig.Default.Config);
+        var config = JsonSerializer.Deserialize(jsonConfig, SerializationConfig.Default.TranslatorConfig);
 
         if (config == null)
             throw new InvalidOperationException("Failed to deserialize the configuration file.");

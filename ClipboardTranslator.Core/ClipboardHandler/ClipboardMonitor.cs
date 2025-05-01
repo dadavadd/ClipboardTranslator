@@ -3,16 +3,19 @@ using System.Runtime.CompilerServices;
 using Windows.Win32.UI.WindowsAndMessaging;
 using Windows.Win32.Foundation;
 using System.ComponentModel;
+using ClipboardTranslator.Core.Interfaces;
+using Serilog;
 
 using static Windows.Win32.PInvoke;
+using ClipboardTranslator.Core.AITranslator;
 
-namespace ClipboardTranslator.ClipboardHandler;
+namespace ClipboardTranslator.Core.ClipboardHandler;
 
-public unsafe class ClipboardMonitor : IDisposable
+public unsafe class ClipboardMonitor : IClipboardMonitor
 {
     private readonly PCWSTR _className;
-    private HWND _hwnd;
 
+    private HWND _hwnd;
     private Thread? _messageLoopThread;
     private uint _messageLoopThreadId;
 
@@ -45,7 +48,11 @@ public unsafe class ClipboardMonitor : IDisposable
             ushort atom = RegisterClassEx(wcex);
 
             if (atom == 0)
-                throw new Win32Exception(Marshal.GetLastWin32Error());
+            {
+                var error = Marshal.GetLastWin32Error();
+                Log.Error("Не удалось зарегистрировать класс окна: {ErrorCode}", error);
+                throw new Win32Exception(error);
+            }
 
             _hwnd = CreateWindowEx(WINDOW_EX_STYLE.WS_EX_NOACTIVATE,
                                    _className,
@@ -60,11 +67,22 @@ public unsafe class ClipboardMonitor : IDisposable
                                    wcex.hInstance,
                                    null);
 
+
             if (_hwnd.IsNull)
-                throw new Win32Exception(Marshal.GetLastWin32Error());
+            {
+                var error = Marshal.GetLastWin32Error();
+                Log.Error("Не удалось создать окно: {ErrorCode}", error);
+                throw new Win32Exception(error);
+            }
 
             if (!AddClipboardFormatListener(_hwnd))
-                throw new Win32Exception(Marshal.GetLastWin32Error());
+            {
+                var error = Marshal.GetLastWin32Error();
+                Log.Error("Не удалось подписаться на обновления буфера обмена: {ErrorCode}", error);
+                throw new Win32Exception(error);
+            }
+
+            Log.Information("Класс ClipboardMonitor успешно инициализирован.");
 
             while (GetMessage(out var msg, HWND.Null, 0, 0) > 0)
             {
@@ -72,12 +90,13 @@ public unsafe class ClipboardMonitor : IDisposable
                 DispatchMessage(in msg);
             }
 
+            Log.Information("Цикл обработки сообщений ClipboardMonitor завершён.");
+
         }) { IsBackground = true };
 
         _messageLoopThread.SetApartmentState(ApartmentState.STA);
         _messageLoopThread.Start();
     }
-
 
     private LRESULT WndProc(HWND hwnd, uint msg, WPARAM wParam, LPARAM lParam)
     {
@@ -85,7 +104,7 @@ public unsafe class ClipboardMonitor : IDisposable
         {
             string text = GetClipboardText();
             if (!string.IsNullOrEmpty(text))
-                ClipboardUpdate?.Invoke(text);
+                _ = ClipboardUpdate?.Invoke(text);
 
             return (LRESULT)0;
         }
@@ -97,10 +116,14 @@ public unsafe class ClipboardMonitor : IDisposable
         string result = string.Empty;
 
         if (!OpenClipboard(HWND.Null))
+        {
+            Log.Warning("Не удалось открыть буфер обмена.");
             return result;
+        }
 
         if (!IsClipboardFormatAvailable(UnicodeText))
         {
+            Log.Debug("Формат UnicodeText не найден в буфере обмена.");
             CloseClipboard();
             return result;
         }
@@ -115,6 +138,10 @@ public unsafe class ClipboardMonitor : IDisposable
             try
             {
                 result = Marshal.PtrToStringUni((nint)dataPtr) ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Ошибка при чтении текста из буфера обмена.");
             }
             finally
             {
@@ -137,5 +164,7 @@ public unsafe class ClipboardMonitor : IDisposable
             PostThreadMessage(_messageLoopThreadId, WmQuit, 0, 0);
             _messageLoopThread?.Join();
         }
+
+        Log.Information($"Вызван Dispose у {nameof(ClipboardMonitor)}");
     }
 }

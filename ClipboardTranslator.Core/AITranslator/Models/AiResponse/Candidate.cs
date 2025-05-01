@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ClipboardTranslator.Translator.Models.AiResponse;
+namespace ClipboardTranslator.Core.AITranslator.Models.AiResponse;
 
-public record Candidate([property: JsonPropertyName("content")] ResponseContent Content,
+internal record Candidate([property: JsonPropertyName("content")] ResponseContent Content,
                         [property: JsonPropertyName("finishReason")] string FinishReason,
                         [property: JsonPropertyName("index")] int Index);
