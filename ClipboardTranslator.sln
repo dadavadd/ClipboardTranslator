@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClipboardTranslator", "Clip
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClipboardTranslator.Core", "ClipboardTranslator.Core\ClipboardTranslator.Core.csproj", "{2A1AB232-035B-4F64-8258-08604E956121}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClipboardTranslator.Tests", "ClipboardTranslator.Tests\ClipboardTranslator.Tests.csproj", "{1A33B03B-9482-4F3D-91B5-FE1FE3034196}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{2A1AB232-035B-4F64-8258-08604E956121}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A1AB232-035B-4F64-8258-08604E956121}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A1AB232-035B-4F64-8258-08604E956121}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1A33B03B-9482-4F3D-91B5-FE1FE3034196}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1A33B03B-9482-4F3D-91B5-FE1FE3034196}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1A33B03B-9482-4F3D-91B5-FE1FE3034196}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1A33B03B-9482-4F3D-91B5-FE1FE3034196}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

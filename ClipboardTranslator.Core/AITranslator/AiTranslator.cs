@@ -9,9 +9,9 @@ using Serilog;
 
 namespace ClipboardTranslator.Core.AITranslator;
 
-public class AiTranslator(TranslatorConfig config, HttpClient? httpClient = null) : IAiTranslator
+public class AiTranslator(TranslatorConfig config) : IAiTranslator
 {
-    private readonly HttpClient _httpClient = httpClient ?? new (new SocketsHttpHandler
+    private readonly HttpClient _httpClient = new(new SocketsHttpHandler
     {
         MaxConnectionsPerServer = 20,
         PooledConnectionIdleTimeout = TimeSpan.FromSeconds(30),
