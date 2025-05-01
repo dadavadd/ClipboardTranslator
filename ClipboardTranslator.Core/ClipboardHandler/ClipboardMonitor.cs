@@ -43,7 +43,7 @@ public unsafe class ClipboardMonitor : IClipboardMonitor
                 lpszClassName = _className
             };
 
-            ushort atom = RegisterClassEx(wcex);
+            ushort atom = RegisterClassEx(in wcex);
 
             if (atom == 0)
             {
