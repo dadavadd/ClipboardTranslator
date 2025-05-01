@@ -1,7 +1,7 @@
 {
     "GeminiOptions": {
-        "ApiKey": "AIzaSyBu95DJ_h4S5-lPSEkXIG9kZXNQBPTG2WU",
-        "ModelId": "gemini-1.5-pro"
+        "ApiKey": "https://aistudio.google.com/apikey",
+        "ModelId": "gemini-1.5-flash-8b"
     },
     "LanguagePair": {
         "SourceLang": "Russian",

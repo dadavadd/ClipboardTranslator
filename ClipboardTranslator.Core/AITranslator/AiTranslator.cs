@@ -1,19 +1,32 @@
-﻿using System.Text.Json;
-using ClipboardTranslator.Core.Models;
+﻿using ClipboardTranslator.Core.Models;
 using ClipboardTranslator.Core.Configuration;
 using ClipboardTranslator.Core.AITranslator.Models.AiRequest;
 using ClipboardTranslator.Core.Interfaces;
 using System.Net.Http.Json;
+using System.Diagnostics;
+using System.Text.Json;
 using Serilog;
 
 namespace ClipboardTranslator.Core.AITranslator;
 
 public class AiTranslator(TranslatorConfig config) : IAiTranslator
 {
-    private readonly HttpClient _httpClient = new();
+    private readonly HttpClient _httpClient = new(new SocketsHttpHandler
+    {
+        MaxConnectionsPerServer = 20,
+        PooledConnectionIdleTimeout = TimeSpan.FromSeconds(30),
+        PooledConnectionLifetime = TimeSpan.FromMinutes(5),
 
-    private readonly string _translatorEndPoint
-      = $"https://generativelanguage.googleapis.com/v1beta/models/"
+        KeepAlivePingDelay = TimeSpan.FromSeconds(30),
+        KeepAlivePingTimeout = TimeSpan.FromSeconds(10),
+        KeepAlivePingPolicy = HttpKeepAlivePingPolicy.Always,
+    })
+    {
+        DefaultRequestVersion = new(2, 0)
+    };
+
+    private readonly string _translatorEndPoint =
+        $"https://generativelanguage.googleapis.com/v1beta/models/"
         + $"{config.GeminiOptions.ModelId}:generateContent"
         + $"?key={config.GeminiOptions.ApiKey}";
 
@@ -23,17 +36,28 @@ public class AiTranslator(TranslatorConfig config) : IAiTranslator
         {
             var requestBody = CreateRequestBody(text);
 
+            Log.Information("Запрос для перевода отправлен.");
+
+            var stopWatch = Stopwatch.StartNew();
+
             var translatorResponse = await _httpClient.PostAsJsonAsync(_translatorEndPoint,
                                                                        requestBody,
                                                                        SerializationConfig.Default.RequestBody);
 
+            stopWatch.Stop();
+
+            Log.Information("Ответ на запрос для перевода пришёл за {ElapsedMilliseconds} мс.", stopWatch.ElapsedMilliseconds);
+
+            string? responseStr;
             if (!translatorResponse.IsSuccessStatusCode)
             {
+                responseStr = await translatorResponse.Content.ReadAsStringAsync();
                 Log.Warning("Ответ от API перевода завершился с ошибкой: {StatusCode}", translatorResponse.StatusCode);
+                Log.Warning("Ответ с ошибкой: {responseStr}", responseStr);
                 return null;
             }
 
-            string responseStr = await translatorResponse.Content.ReadAsStringAsync();
+            responseStr = await translatorResponse.Content.ReadAsStringAsync();
 
             var response = JsonSerializer.Deserialize(responseStr, SerializationConfig.Default.Response);
 
@@ -67,7 +91,7 @@ public class AiTranslator(TranslatorConfig config) : IAiTranslator
         string instruction = string.Concat(config.GeminiOptions.Instructions, sourceLang, targetLang);
 
         return new RequestBody(
-            new GenerationConfig(0, 64, 65536, "text/plain"),
+            new GenerationConfig(0, 1, 8192, "text/plain"),
             [new RequestContent("user", [new RequstPart(text)])],
             new RequestContent("user", [new RequstPart(instruction)])
         );

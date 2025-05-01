@@ -59,28 +59,26 @@ public class InputSimulator
         if (string.IsNullOrEmpty(text))
             return true;
 
-        char[] chars = text.ToCharArray();
-
-        INPUT[] inputs = new INPUT[chars.Length * 2];
-
-        int inputIndex = 0;
-
-        foreach (var c in chars)
+        static INPUT Make(char c, KEYBD_EVENT_FLAGS flags) => new()
         {
-            inputs[inputIndex].type = INPUT_KEYBOARD;
-            inputs[inputIndex].Anonymous.ki.wScan = c;
-            inputs[inputIndex].Anonymous.ki.dwFlags = KEYEVENTF_UNICODE;
-            inputs[inputIndex].Anonymous.ki.time = 0;
-            inputs[inputIndex].Anonymous.ki.dwExtraInfo = (nuint)IntPtr.Zero;
-            inputIndex++;
+            type = INPUT_KEYBOARD,
+            Anonymous = new INPUT._Anonymous_e__Union
+            {
+                ki = new()
+                {
+                    wScan = c,
+                    dwFlags = flags,
+                    time = 0,
+                    dwExtraInfo = (nuint)IntPtr.Zero
+                }
+            }
+        };
 
-            inputs[inputIndex].type = INPUT_KEYBOARD;
-            inputs[inputIndex].Anonymous.ki.wScan = c;
-            inputs[inputIndex].Anonymous.ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP;
-            inputs[inputIndex].Anonymous.ki.time = 0;
-            inputs[inputIndex].Anonymous.ki.dwExtraInfo = (nuint)IntPtr.Zero;
-            inputIndex++;
-        }
+        var inputs = text
+            .SelectMany(static c => new[] {
+                Make(c, KEYEVENTF_UNICODE),
+                Make(c, KEYEVENTF_UNICODE | KEYEVENTF_KEYUP)})
+            .ToArray();
 
         unsafe
         {
