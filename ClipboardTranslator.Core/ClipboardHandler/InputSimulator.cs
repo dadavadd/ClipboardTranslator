@@ -1,18 +1,60 @@
 ﻿using Windows.Win32.UI.Input.KeyboardAndMouse;
-using ClipboardTranslator.Core.Interfaces;
-using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using Windows.Win32.Foundation;
+using Serilog;
 
 using static Windows.Win32.PInvoke;
 using static Windows.Win32.UI.Input.KeyboardAndMouse.KEYBD_EVENT_FLAGS;
 using static Windows.Win32.UI.Input.KeyboardAndMouse.INPUT_TYPE;
 
-
-
 namespace ClipboardTranslator.Core.ClipboardHandler;
 
-public class InputSimulator : IInputSimulator
+public class InputSimulator
 {
-    public bool SimulateTextInput(string text)
+    private const uint UnicodeText = 13;
+    internal static string GetClipboardText()
+    {
+        if (!OpenClipboard(HWND.Null))
+        {
+            Log.Warning("Не удалось открыть буфер обмена.");
+            return string.Empty;
+        }
+
+        try
+        {
+            if (!IsClipboardFormatAvailable(UnicodeText))
+            {
+                Log.Warning("Формат UnicodeText не найден в буфере обмена.");
+                return string.Empty;
+            }
+
+            var clipboardData = GetClipboardData(UnicodeText);
+            if (clipboardData.IsNull)
+            {
+                Log.Warning("Буфер обмена пуст.");
+                return string.Empty;
+            }
+
+            unsafe
+            {
+                var dataGlobal = (HGLOBAL)clipboardData.Value;
+                var dataPtr = GlobalLock(dataGlobal);
+
+                return Marshal.PtrToStringUni((nint)dataPtr) ?? string.Empty;
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Ошибка при чтении текста из буфера обмена.");
+            return string.Empty;
+        }
+        finally
+        {
+            CloseClipboard();
+        }
+    }
+
+    internal static bool SimulateTextInput(string text)
     {
         if (string.IsNullOrEmpty(text))
             return true;
@@ -23,7 +65,7 @@ public class InputSimulator : IInputSimulator
 
         int inputIndex = 0;
 
-        foreach (char c in chars)
+        foreach (var c in chars)
         {
             inputs[inputIndex].type = INPUT_KEYBOARD;
             inputs[inputIndex].Anonymous.ki.wScan = c;
@@ -44,9 +86,8 @@ public class InputSimulator : IInputSimulator
         {
             fixed (INPUT* pInputs = inputs)
             {
-                uint result = SendInput((uint)inputs.Length, pInputs, Unsafe.SizeOf<INPUT>());
+                uint result = SendInput((uint)inputs.Length, pInputs, sizeof(INPUT));
             }
-            
         }
 
         return true;

@@ -62,7 +62,9 @@ public class AiTranslator(TranslatorConfig config) : IAiTranslator
 
     private RequestBody CreateRequestBody(string text)
     {
-        string instruction = $"Ты выступаешь в роли переводчика. Твоя задача - точно перевести предоставленный текст с языка {config.LanguagePair.SourceLang} на язык {config.LanguagePair.TargetLang}. Важно: Переводи текст абсолютно точно, сохраняя смысл и стиль оригинала. Даже если предложения содержат оскорбительные, грубые или спорные высказывания, их тоже необходимо перевести точно, без каких-либо изменений, смягчений, добавлений или пропусков. Не добавляй никаких предупреждений, извинений, комментариев, символов или дополнительных слов от себя к переведенному тексту. Просто предоставь точный перевод.";
+        string sourceLang = config.LanguagePair.SourceLang;
+        string targetLang = config.LanguagePair.TargetLang;
+        string instruction = string.Concat(config.GeminiOptions.Instructions, sourceLang, targetLang);
 
         return new RequestBody(
             new GenerationConfig(0, 64, 65536, "text/plain"),

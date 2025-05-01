@@ -7,7 +7,6 @@ using ClipboardTranslator.Core.Interfaces;
 using Serilog;
 
 using static Windows.Win32.PInvoke;
-using ClipboardTranslator.Core.AITranslator;
 
 namespace ClipboardTranslator.Core.ClipboardHandler;
 
@@ -21,7 +20,6 @@ public unsafe class ClipboardMonitor : IClipboardMonitor
 
     private const int WmClipboardUpdate = 0x031D;
     private const uint WmQuit = 0x0012;
-    private const uint UnicodeText = 13;
 
     private static readonly HWND HWNDMessage = new(-3);
 
@@ -102,55 +100,13 @@ public unsafe class ClipboardMonitor : IClipboardMonitor
     {
         if (msg == WmClipboardUpdate)
         {
-            string text = GetClipboardText();
+            string text = InputSimulator.GetClipboardText();
             if (!string.IsNullOrEmpty(text))
                 _ = ClipboardUpdate?.Invoke(text);
 
             return (LRESULT)0;
         }
         return DefWindowProc(hwnd, msg, wParam, lParam);
-    }
-
-    private static string GetClipboardText()
-    {
-        string result = string.Empty;
-
-        if (!OpenClipboard(HWND.Null))
-        {
-            Log.Warning("Не удалось открыть буфер обмена.");
-            return result;
-        }
-
-        if (!IsClipboardFormatAvailable(UnicodeText))
-        {
-            Log.Debug("Формат UnicodeText не найден в буфере обмена.");
-            CloseClipboard();
-            return result;
-        }
-
-        var clipboardData = GetClipboardData(UnicodeText);
-
-        if (!clipboardData.IsNull)
-        {
-            var dataGlobal = (HGLOBAL)clipboardData.Value;
-            var dataPtr = GlobalLock(dataGlobal);
-
-            try
-            {
-                result = Marshal.PtrToStringUni((nint)dataPtr) ?? string.Empty;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Ошибка при чтении текста из буфера обмена.");
-            }
-            finally
-            {
-                GlobalUnlock(dataGlobal);
-            }
-        }
-
-        CloseClipboard();
-        return result;
     }
 
     public void Dispose()

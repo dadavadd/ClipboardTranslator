@@ -1,4 +1,5 @@
-﻿using ClipboardTranslator.Core.Interfaces;
+﻿using ClipboardTranslator.Core.ClipboardHandler;
+using ClipboardTranslator.Core.Interfaces;
 using Serilog;
 
 namespace ClipboardTranslator.Core;
@@ -6,13 +7,11 @@ namespace ClipboardTranslator.Core;
 public class Translator : IDisposable
 {
     private readonly IClipboardMonitor _monitor;
-    private readonly IInputSimulator _simulator;
     private readonly IAiTranslator _translator;
 
-    public Translator(IClipboardMonitor monitor, IInputSimulator simulator, IAiTranslator translator)
+    public Translator(IClipboardMonitor monitor, IAiTranslator translator)
     {
         _monitor = monitor;
-        _simulator = simulator;
         _translator = translator;
 
         _monitor.ClipboardUpdate += OnClipboardUpdate;
@@ -34,7 +33,7 @@ public class Translator : IDisposable
 
         Log.Information("Перевод завершён: {TranslatedText}", translatedText);
 
-        _simulator.SimulateTextInput(translatedText);
+        InputSimulator.SimulateTextInput(translatedText);
     }
 
     public void Dispose()
