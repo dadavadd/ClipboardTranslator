@@ -17,6 +17,7 @@ try
         new AiTranslator(config)
     );
 
+    Console.WriteLine("Переводчик запущен. Нажмите Enter для завершения работы.");
     Console.ReadLine();
 }
 catch (Exception ex)

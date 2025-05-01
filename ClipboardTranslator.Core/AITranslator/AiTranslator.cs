@@ -35,29 +35,14 @@ public class AiTranslator(TranslatorConfig config, HttpClient? httpClient = null
         try
         {
             var requestBody = CreateRequestBody(text);
+            var translatorResponse = await SendRequestAsync(requestBody);
+            string? responseStr = await CheckResponseAsync(translatorResponse);
 
-            Log.Information("Запрос для перевода отправлен.");
-
-            var stopWatch = Stopwatch.StartNew();
-
-            var translatorResponse = await _httpClient.PostAsJsonAsync(_translatorEndPoint,
-                                                                       requestBody,
-                                                                       SerializationConfig.Default.RequestBody);
-
-            stopWatch.Stop();
-
-            Log.Information("Ответ на запрос для перевода пришёл за {ElapsedMilliseconds} мс.", stopWatch.ElapsedMilliseconds);
-
-            string? responseStr;
-            if (!translatorResponse.IsSuccessStatusCode)
+            if (responseStr is null)
             {
-                responseStr = await translatorResponse.Content.ReadAsStringAsync();
-                Log.Warning("Ответ от API перевода завершился с ошибкой: {StatusCode}", translatorResponse.StatusCode);
-                Log.Warning("Ответ с ошибкой: {responseStr}", responseStr);
+                Log.Warning("Ответ от API перевода пустой.");
                 return null;
             }
-
-            responseStr = await translatorResponse.Content.ReadAsStringAsync();
 
             var response = JsonSerializer.Deserialize(responseStr, SerializationConfig.Default.Response);
 
@@ -82,6 +67,36 @@ public class AiTranslator(TranslatorConfig config, HttpClient? httpClient = null
             Log.Error(ex, "Произошла ошибка при переводе текста: {Message}", ex.Message);
             return null;
         }
+    }
+
+    private async Task<HttpResponseMessage> SendRequestAsync(RequestBody? requestBody)
+    {
+        Log.Information("Запрос для перевода отправлен.");
+
+        var stopWatch = Stopwatch.StartNew();
+
+        var translatorResponse = await _httpClient.PostAsJsonAsync(_translatorEndPoint,
+                                                                   requestBody,
+                                                                   SerializationConfig.Default.RequestBody);
+
+        stopWatch.Stop();
+
+        Log.Information("Ответ на запрос для перевода пришёл за {ElapsedMilliseconds} мс.", stopWatch.ElapsedMilliseconds);
+
+        return translatorResponse;
+    }
+
+    private async Task<string?> CheckResponseAsync(HttpResponseMessage response)
+    {
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorResponse = await response.Content.ReadAsStringAsync();
+            Log.Warning("Ошибка при запросе к API: {StatusCode}", response.StatusCode);
+            Log.Warning("Ответ с ошибкой: {errorResponse}", errorResponse);
+            return null;
+        }
+
+        return await response.Content.ReadAsStringAsync();
     }
 
     private RequestBody CreateRequestBody(string text)
