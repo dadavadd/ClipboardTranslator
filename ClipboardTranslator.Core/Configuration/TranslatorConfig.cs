@@ -1,9 +1,12 @@
 ﻿using System.Text.Json;
 using ClipboardTranslator.Core.Models;
+using ClipboardTranslator.Core.Translators.Models;
 
 namespace ClipboardTranslator.Core.Configuration;
 
-public record TranslatorConfig(GeminiOptions GeminiOptions, LanguagePair LanguagePair)
+public record TranslatorConfig(string TranslationMode,
+                               GeminiOptions GeminiOptions,
+                               LanguagePair LanguagePair)
 {
     public static TranslatorConfig Load()
     {

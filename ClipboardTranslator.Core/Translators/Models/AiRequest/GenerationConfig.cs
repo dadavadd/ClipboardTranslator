@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ClipboardTranslator.Core.AITranslator.Models.AiRequest;
+namespace ClipboardTranslator.Core.Translators.Models.AiRequest;
 
 internal record GenerationConfig([property: JsonPropertyName("topP")] double TopP,
                                [property: JsonPropertyName("topK")] int TopK,

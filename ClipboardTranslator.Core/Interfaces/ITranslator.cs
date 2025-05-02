@@ -1,6 +1,6 @@
 ﻿namespace ClipboardTranslator.Core.Interfaces;
 
-public interface IAiTranslator : IDisposable
+public interface ITranslator : IDisposable
 {
     Task<string?> TranslateAsync(string input);
 }

@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ClipboardTranslator.Core.AITranslator.Models.AiResponse;
+namespace ClipboardTranslator.Core.Translators.Models.AiResponse;
 
 internal record ResponsePart([property: JsonPropertyName("text")] string Text);

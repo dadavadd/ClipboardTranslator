@@ -1,6 +1,6 @@
 ﻿using ClipboardTranslator.Core.ClipboardHandler;
 using ClipboardTranslator.Core.Configuration;
-using ClipboardTranslator.Core.AITranslator;
+using ClipboardTranslator.Core.Translators;
 using ClipboardTranslator.Core;
 using Serilog;
 
@@ -8,14 +8,12 @@ try
 {
     Console.Title = "https://github.com/dadavadd/ClipboardTranslator";
 
-    SetConsoleLoggingOption();
-
     var config = TranslatorConfig.Load();
 
-    using var translator = new Translator(
-        new ClipboardMonitor(),
-        new AiTranslator(config)
-    );
+    SetConsoleLoggingOption();
+
+    using var translator = new Translator(new ClipboardMonitor(),
+                                          new AiTranslator(config));
 
     Console.WriteLine("Переводчик запущен. Нажмите Enter для завершения работы.");
     Console.ReadLine();

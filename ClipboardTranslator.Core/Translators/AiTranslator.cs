@@ -1,15 +1,15 @@
 ﻿using ClipboardTranslator.Core.Models;
 using ClipboardTranslator.Core.Configuration;
-using ClipboardTranslator.Core.AITranslator.Models.AiRequest;
+using ClipboardTranslator.Core.Translators.Models.AiRequest;
 using ClipboardTranslator.Core.Interfaces;
 using System.Net.Http.Json;
 using System.Diagnostics;
 using System.Text.Json;
 using Serilog;
 
-namespace ClipboardTranslator.Core.AITranslator;
+namespace ClipboardTranslator.Core.Translators;
 
-public class AiTranslator(TranslatorConfig config, HttpClient? httpClient = null) : IAiTranslator
+public class AiTranslator(TranslatorConfig config, HttpClient? httpClient = null) : ITranslator
 {
     private readonly HttpClient _httpClient = httpClient ?? new (new SocketsHttpHandler
     {
@@ -38,7 +38,7 @@ public class AiTranslator(TranslatorConfig config, HttpClient? httpClient = null
             var translatorResponse = await SendRequestAsync(requestBody);
             string? responseStr = await CheckResponseAsync(translatorResponse);
 
-            if (responseStr is null)
+            if (responseStr == null)
             {
                 Log.Warning("Ответ от API перевода пустой.");
                 return null;

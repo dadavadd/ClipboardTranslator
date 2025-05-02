@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ClipboardTranslator.Core.AITranslator.Models.AiResponse;
+namespace ClipboardTranslator.Core.Translators.Models.AiResponse;
 
 internal record UsageMetadata([property: JsonPropertyName("promptTokenCount")] int PromptTokenCount,
                             [property: JsonPropertyName("candidatesTokenCount")] int CandidatesTokenCount,

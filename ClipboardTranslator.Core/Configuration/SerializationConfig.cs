@@ -1,7 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 using ClipboardTranslator.Core.Configuration;
-using ClipboardTranslator.Core.AITranslator.Models.AiRequest;
-using ClipboardTranslator.Core.AITranslator.Models.AiResponse;
+using ClipboardTranslator.Core.Translators.Models;
+using ClipboardTranslator.Core.Translators.Models.AiRequest;
+using ClipboardTranslator.Core.Translators.Models.AiResponse;
 
 namespace ClipboardTranslator.Core.Models;
 

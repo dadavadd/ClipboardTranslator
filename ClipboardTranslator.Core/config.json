@@ -1,6 +1,7 @@
 {
+    "TranslationMode": "Ai",
     "GeminiOptions": {
-        "ApiKey": "https://aistudio.google.com/apikey",
+        "ApiKey": "gemini_api_key",
         "ModelId": "gemini-1.5-flash-8b"
     },
     "LanguagePair": {

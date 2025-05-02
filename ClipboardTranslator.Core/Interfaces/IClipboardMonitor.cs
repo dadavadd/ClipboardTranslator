@@ -1,8 +1,6 @@
-﻿using ClipboardTranslator.Core.ClipboardHandler;
-
-namespace ClipboardTranslator.Core.Interfaces;
+﻿namespace ClipboardTranslator.Core.Interfaces;
 
 public interface IClipboardMonitor : IDisposable
 {
-    event ClipboardMonitor.ClipboardUpdateHandler ClipboardUpdate;
+    event Func<string, Task>? ClipboardUpdate;
 }

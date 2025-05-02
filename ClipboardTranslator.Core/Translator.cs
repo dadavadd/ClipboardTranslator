@@ -7,9 +7,9 @@ namespace ClipboardTranslator.Core;
 public class Translator : IDisposable
 {
     private readonly IClipboardMonitor _monitor;
-    private readonly IAiTranslator _translator;
+    private readonly ITranslator _translator;
 
-    public Translator(IClipboardMonitor monitor, IAiTranslator translator)
+    public Translator(IClipboardMonitor monitor, ITranslator translator)
     {
         _monitor = monitor;
         _translator = translator;

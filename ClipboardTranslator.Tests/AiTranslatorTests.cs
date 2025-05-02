@@ -1,9 +1,10 @@
 ﻿using Moq;
-using ClipboardTranslator.Core.AITranslator;
+using ClipboardTranslator.Core.Translators;
 using ClipboardTranslator.Core.Configuration;
 using Moq.Protected;
 using System.Net;
 using System.Text;
+using ClipboardTranslator.Core.Translators.Models;
 
 
 namespace ClipboardTranslator.Tests;
@@ -238,7 +239,7 @@ public class AiTranslatorTests
 
     private TranslatorConfig CreateDummyConfig()
     {
-        return new TranslatorConfig(
+        return new TranslatorConfig("ai",
             new GeminiOptions(ApiKey: "dummy-key", ModelId: "dummy-model", Instructions: "dummy-instructions"),
             new LanguagePair(SourceLang: "src", TargetLang: "trg")
         );

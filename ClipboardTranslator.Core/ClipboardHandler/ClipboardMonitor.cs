@@ -23,8 +23,7 @@ public unsafe class ClipboardMonitor : IClipboardMonitor
 
     private static readonly HWND HWNDMessage = new(-3);
 
-    public delegate Task ClipboardUpdateHandler(string text);
-    public event ClipboardUpdateHandler? ClipboardUpdate;
+    public event Func<string, Task>? ClipboardUpdate;
 
     public ClipboardMonitor()
     {
