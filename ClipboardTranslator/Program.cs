@@ -12,11 +12,15 @@ try
 
     SetConsoleLoggingOption();
 
-    using var translator = new Translator(new WindowsClipboardMonitor(),
-                                          new AiTranslator(config));
+    var cts = new CancellationTokenSource();
+
+    using var translator = new Translator(new WindowsClipboardMonitor(cts.Token),
+                                          new AiTranslator(config, cts.Token));
 
     Console.WriteLine("Переводчик запущен. Нажмите Enter для завершения работы.");
     Console.ReadLine();
+
+    cts.Cancel();
 }
 catch (Exception ex)
 {
@@ -52,6 +56,3 @@ void SetConsoleLoggingOption()
 
     Console.Clear();
 }
-
-
-

@@ -24,10 +24,14 @@ public unsafe class WindowsClipboardMonitor : IClipboardMonitor
 
     private static readonly HWND HWNDMessage = new(-3);
 
+    private CancellationToken _token;
+
     public event Func<string, Task>? ClipboardUpdate;
 
-    public WindowsClipboardMonitor()
+    public WindowsClipboardMonitor(CancellationToken token = default)
     {
+        _token = token;
+
         fixed (char* firstChar = "Translator_" + Guid.NewGuid())
             _className = firstChar;
 
@@ -82,7 +86,7 @@ public unsafe class WindowsClipboardMonitor : IClipboardMonitor
 
             Log.Information("Класс ClipboardMonitor успешно инициализирован.");
 
-            while (GetMessage(out var msg, HWND.Null, 0, 0) > 0)
+            while (GetMessage(out var msg, HWND.Null, 0, 0) > 0 && !_token.IsCancellationRequested)
             {
                 TranslateMessage(in msg);
                 DispatchMessage(in msg);
@@ -90,7 +94,8 @@ public unsafe class WindowsClipboardMonitor : IClipboardMonitor
 
             Log.Information("Цикл обработки сообщений ClipboardMonitor завершён.");
 
-        }) { IsBackground = true };
+        })
+        { IsBackground = true };
 
         _messageLoopThread.SetApartmentState(ApartmentState.STA);
         _messageLoopThread.Start();
@@ -102,19 +107,22 @@ public unsafe class WindowsClipboardMonitor : IClipboardMonitor
         {
             string text = InputSimulator.GetClipboardText();
 
-            if (!string.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(text))
             {
-                try
+                return (LRESULT)0;
+            }
+
+            try
+            {
+                if (!_token.IsCancellationRequested)
                 {
                     _ = ClipboardUpdate?.Invoke(text);
                 }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Ошибка в обработчике ClipboardUpdate");
-                }
             }
-
-            return (LRESULT)0;
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Ошибка в обработчике ClipboardUpdate");
+            }
         }
         return DefWindowProc(hwnd, msg, wParam, lParam);
     }
@@ -125,6 +133,7 @@ public unsafe class WindowsClipboardMonitor : IClipboardMonitor
             return;
 
         _isDisposed = true;
+
         RemoveClipboardFormatListener(_hwnd);
         DestroyWindow(_hwnd);
         UnregisterClass(_className, GetModuleHandle((PCWSTR)null));

@@ -22,7 +22,7 @@ public class AiTranslatorTests
         var mockMessageHandler = SetupMockHttpMessageHandler(HttpStatusCode.OK, CreateFakeSuccessJson(ExpectedTranslation));
         var httpClient = new HttpClient(mockMessageHandler.Object) { BaseAddress = new Uri("http://fake-gemini-api/") };
         var config = CreateDummyConfig();
-        var translator = new AiTranslator(config, httpClient);
+        var translator = new AiTranslator(config, default, httpClient);
 
         // Act
         var actualTranslation = await translator.TranslateAsync(SourceText);
@@ -46,7 +46,7 @@ public class AiTranslatorTests
         var mockMessageHandler = SetupMockHttpMessageHandler(statusCode, """{ "error": "API error details" }"""); // Содержимое ошибки не так важно для этого теста
         var httpClient = new HttpClient(mockMessageHandler.Object) { BaseAddress = new Uri("http://fake-gemini-api/") };
         var config = CreateDummyConfig();
-        var translator = new AiTranslator(config, httpClient);
+        var translator = new AiTranslator(config, default, httpClient);
 
         // Act
         var result = await translator.TranslateAsync(SourceText);
@@ -63,7 +63,7 @@ public class AiTranslatorTests
         var mockMessageHandler = SetupMockHttpMessageHandler(HttpStatusCode.OK, "Это не JSON { invalid syntax");
         var httpClient = new HttpClient(mockMessageHandler.Object) { BaseAddress = new Uri("http://fake-gemini-api/") };
         var config = CreateDummyConfig();
-        var translator = new AiTranslator(config, httpClient);
+        var translator = new AiTranslator(config, default, httpClient);
 
         // Act
         var result = await translator.TranslateAsync(SourceText);
@@ -81,7 +81,7 @@ public class AiTranslatorTests
         var mockMessageHandler = SetupMockHttpMessageHandler(HttpStatusCode.OK, jsonWithoutCandidates);
         var httpClient = new HttpClient(mockMessageHandler.Object) { BaseAddress = new Uri("http://fake-gemini-api/") };
         var config = CreateDummyConfig();
-        var translator = new AiTranslator(config, httpClient);
+        var translator = new AiTranslator(config, default, httpClient);
 
         // Act
         var result = await translator.TranslateAsync(SourceText);
@@ -99,7 +99,7 @@ public class AiTranslatorTests
         var mockMessageHandler = SetupMockHttpMessageHandler(HttpStatusCode.OK, jsonWithEmptyCandidates);
         var httpClient = new HttpClient(mockMessageHandler.Object) { BaseAddress = new Uri("http://fake-gemini-api/") };
         var config = CreateDummyConfig();
-        var translator = new AiTranslator(config, httpClient);
+        var translator = new AiTranslator(config, default, httpClient);
 
         // Act
         var result = await translator.TranslateAsync(SourceText);
@@ -117,7 +117,7 @@ public class AiTranslatorTests
         var mockMessageHandler = SetupMockHttpMessageHandler(HttpStatusCode.OK, jsonWithoutContent);
         var httpClient = new HttpClient(mockMessageHandler.Object) { BaseAddress = new Uri("http://fake-gemini-api/") };
         var config = CreateDummyConfig();
-        var translator = new AiTranslator(config, httpClient);
+        var translator = new AiTranslator(config, default, httpClient);
 
         // Act
         var result = await translator.TranslateAsync(SourceText);
@@ -135,7 +135,7 @@ public class AiTranslatorTests
         var mockMessageHandler = SetupMockHttpMessageHandler(HttpStatusCode.OK, jsonWithoutParts);
         var httpClient = new HttpClient(mockMessageHandler.Object) { BaseAddress = new Uri("http://fake-gemini-api/") };
         var config = CreateDummyConfig();
-        var translator = new AiTranslator(config, httpClient);
+        var translator = new AiTranslator(config, default, httpClient);
 
         // Act
         var result = await translator.TranslateAsync(SourceText);
@@ -153,7 +153,7 @@ public class AiTranslatorTests
         var mockMessageHandler = SetupMockHttpMessageHandler(HttpStatusCode.OK, jsonWithEmptyParts);
         var httpClient = new HttpClient(mockMessageHandler.Object) { BaseAddress = new Uri("http://fake-gemini-api/") };
         var config = CreateDummyConfig();
-        var translator = new AiTranslator(config, httpClient);
+        var translator = new AiTranslator(config, default, httpClient);
 
         // Act
         var result = await translator.TranslateAsync(SourceText);
@@ -171,7 +171,7 @@ public class AiTranslatorTests
         var mockMessageHandler = SetupMockHttpMessageHandler(HttpStatusCode.OK, jsonWithoutText);
         var httpClient = new HttpClient(mockMessageHandler.Object) { BaseAddress = new Uri("http://fake-gemini-api/") };
         var config = CreateDummyConfig();
-        var translator = new AiTranslator(config, httpClient);
+        var translator = new AiTranslator(config, default, httpClient);
 
         // Act
         var result = await translator.TranslateAsync(SourceText);
@@ -201,7 +201,7 @@ public class AiTranslatorTests
         var mockMessageHandler = SetupMockHttpMessageHandler(HttpStatusCode.OK, jsonWithSpecificText);
         var httpClient = new HttpClient(mockMessageHandler.Object) { BaseAddress = new Uri("http://fake-gemini-api/") };
         var config = CreateDummyConfig();
-        var translator = new AiTranslator(config, httpClient);
+        var translator = new AiTranslator(config, default, httpClient);
 
         // Act
         var result = await translator.TranslateAsync(SourceText);
@@ -226,7 +226,7 @@ public class AiTranslatorTests
 
         var httpClient = new HttpClient(mockMessageHandler.Object) { BaseAddress = new Uri("http://fake-gemini-api/") };
         var config = CreateDummyConfig();
-        var translator = new AiTranslator(config, httpClient);
+        var translator = new AiTranslator(config, default, httpClient);
 
         // Act
         var result = await translator.TranslateAsync(SourceText);

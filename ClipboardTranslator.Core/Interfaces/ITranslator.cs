@@ -2,5 +2,5 @@
 
 public interface ITranslator : IDisposable
 {
-    Task<string?> TranslateAsync(string input);
+    Task<string?> TranslateAsync(string text);
 }

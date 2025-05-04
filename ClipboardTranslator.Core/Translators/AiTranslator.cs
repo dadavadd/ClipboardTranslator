@@ -9,9 +9,10 @@ using Serilog;
 
 namespace ClipboardTranslator.Core.Translators;
 
-public class AiTranslator(TranslatorConfig config, HttpClient? httpClient = null) : ITranslator
+public class AiTranslator(TranslatorConfig config,
+                          CancellationToken token = default) : ITranslator
 {
-    private readonly HttpClient _httpClient = httpClient ?? new (new SocketsHttpHandler
+    private readonly HttpClient _httpClient = new (new SocketsHttpHandler
     {
         MaxConnectionsPerServer = 20,
         PooledConnectionIdleTimeout = TimeSpan.FromSeconds(30),
@@ -30,11 +31,15 @@ public class AiTranslator(TranslatorConfig config, HttpClient? httpClient = null
         + $"{config.GeminiOptions.ModelId}:generateContent"
         + $"?key={config.GeminiOptions.ApiKey}";
 
+
+
     public async Task<string?> TranslateAsync(string text)
     {
+        token.ThrowIfCancellationRequested();
+
         var requestBody = CreateRequestBody(text);
-        var translatorResponse = await SendRequestAsync(requestBody);
-        string? responseStr = await CheckResponseAsync(translatorResponse);
+        var translatorResponse = await SendRequestAsync(requestBody, token);
+        string? responseStr = await CheckResponseAsync(translatorResponse, token);
 
         if (responseStr == null)
             throw new InvalidOperationException("Пустой ответ от API перевода.");
@@ -50,7 +55,7 @@ public class AiTranslator(TranslatorConfig config, HttpClient? httpClient = null
         return result;
     }
 
-    private async Task<HttpResponseMessage> SendRequestAsync(RequestBody? requestBody)
+    private async Task<HttpResponseMessage> SendRequestAsync(RequestBody? requestBody, CancellationToken token)
     {
         Log.Information("Запрос для перевода отправлен.");
 
@@ -58,7 +63,7 @@ public class AiTranslator(TranslatorConfig config, HttpClient? httpClient = null
 
         var translatorResponse = await _httpClient.PostAsJsonAsync(_translatorEndPoint,
                                                                    requestBody,
-                                                                   SerializationConfig.Default.RequestBody);
+                                                                   SerializationConfig.Default.RequestBody, token);
 
         stopWatch.Stop();
 
@@ -67,17 +72,17 @@ public class AiTranslator(TranslatorConfig config, HttpClient? httpClient = null
         return translatorResponse;
     }
 
-    private async Task<string?> CheckResponseAsync(HttpResponseMessage response)
+    private async Task<string?> CheckResponseAsync(HttpResponseMessage response, CancellationToken token)
     {
         if (!response.IsSuccessStatusCode)
         {
-            var errorResponse = await response.Content.ReadAsStringAsync();
+            var errorResponse = await response.Content.ReadAsStringAsync(token);
             Log.Warning("Ошибка при запросе к API: {StatusCode}", response.StatusCode);
             Log.Warning("Ответ с ошибкой: {errorResponse}", errorResponse);
             return null;
         }
 
-        return await response.Content.ReadAsStringAsync();
+        return await response.Content.ReadAsStringAsync(token);
     }
 
     private RequestBody CreateRequestBody(string text)
