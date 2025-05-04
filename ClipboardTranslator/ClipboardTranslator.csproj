@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<PublishAot>true</PublishAot>
-  <ApplicationIcon>icon.ico</ApplicationIcon>
+	<ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
 
 

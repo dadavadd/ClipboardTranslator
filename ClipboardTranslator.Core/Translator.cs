@@ -19,21 +19,25 @@ public class Translator : IDisposable
 
     private async Task OnClipboardUpdate(string text)
     {
-        Log.Information("Получен текст из буфера обмена: {Text}", text);
-
-        string? translatedText = await _translator.TranslateAsync(text);
-
-        if (string.IsNullOrEmpty(translatedText))
+        try
         {
-            Log.Warning("Переведённый текст оказался пустым или null.");
-            return;
+            Log.Information($"Получен текст из буфера обмена: {text}");
+            string? translatedText = await _translator.TranslateAsync(text);
+            if (string.IsNullOrEmpty(translatedText))
+            {
+                Log.Warning("Переведённый текст оказался пустым или null.");
+                return;
+            }
+
+            translatedText = translatedText.TrimEnd('\n');
+            Log.Information($"Перевод завершён: {text}");
+
+            InputSimulator.SimulateTextInput(translatedText);
         }
-
-        translatedText = translatedText.TrimEnd('\n');
-
-        Log.Information("Перевод завершён: {TranslatedText}", translatedText);
-
-        InputSimulator.SimulateTextInput(translatedText);
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Ошибка при переводе текста.");
+        }
     }
 
     public void Dispose()

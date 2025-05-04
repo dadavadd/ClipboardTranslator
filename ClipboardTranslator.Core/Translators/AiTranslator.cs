@@ -31,8 +31,6 @@ public class AiTranslator(TranslatorConfig config,
         + $"{config.GeminiOptions.ModelId}:generateContent"
         + $"?key={config.GeminiOptions.ApiKey}";
 
-
-
     public async Task<string?> TranslateAsync(string text)
     {
         token.ThrowIfCancellationRequested();
@@ -50,7 +48,7 @@ public class AiTranslator(TranslatorConfig config,
         var result = response.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
 
         if (string.IsNullOrWhiteSpace(result))
-            throw new InvalidOperationException("Ответ от API перевода не содержит текста.");
+            throw new InvalidOperationException($"Ответ от API перевода не содержит переведённого текста. Ошибка от API: {response.Candidates?.FirstOrDefault()?.FinishReason}");
 
         return result;
     }

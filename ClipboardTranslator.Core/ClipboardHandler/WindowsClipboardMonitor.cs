@@ -109,9 +109,11 @@ public unsafe class WindowsClipboardMonitor : IClipboardMonitor
 
             if (string.IsNullOrEmpty(text))
             {
+                Log.Information("Буфер обмена пустой или не содержит текст.");
                 return (LRESULT)0;
             }
 
+            Log.Information("Получен текст из буфера обмена: {Text}", text);
             try
             {
                 if (!_token.IsCancellationRequested)
