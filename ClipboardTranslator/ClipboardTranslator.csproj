@@ -6,49 +6,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<PublishAot>true</PublishAot>
+  <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
 
-	<PropertyGroup>
-		<InvariantGlobalization>true</InvariantGlobalization>
-		<UseSystemResourceKeys>true</UseSystemResourceKeys>
-		<IlcGenerateStackTraceData>false</IlcGenerateStackTraceData>
-		<IlcTrimMetadata>true</IlcTrimMetadata>
-		<IlcGenerateCompleteTypeMetadata>false</IlcGenerateCompleteTypeMetadata>
-		<StackTraceSupport>true</StackTraceSupport>
-		<IlcDisableReflection>true</IlcDisableReflection>
-		<StripSymbols>true</StripSymbols>
-
-		<OptimizationPreference>Speed</OptimizationPreference>
-	</PropertyGroup>
 
 	<PropertyGroup>
-		<IlcGenerateMstatFile>true</IlcGenerateMstatFile>
-		<IlcGenerateDgmlFile>true</IlcGenerateDgmlFile>
-		<IlcGenerateMetadataLog>true</IlcGenerateMetadataLog>
-		<IlcDumpGeneratedIL>true</IlcDumpGeneratedIL>
-
-		<EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>true</EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>
-
-		<SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
-		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-		<ILLinkTreatWarningsAsErrors>false</ILLinkTreatWarningsAsErrors>
-		<TrimmerSingleWarn>false</TrimmerSingleWarn>
-		<TrimmerRemoveSymbols>true</TrimmerRemoveSymbols>
-		<AutoreleasePoolSupport>false</AutoreleasePoolSupport>
-		<DebuggerSupport>false</DebuggerSupport>
-		<EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
-		<EnableUnsafeUTF7Encoding>false</EnableUnsafeUTF7Encoding>
-		<HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
-		<EventSourceSupport>false</EventSourceSupport>
-		<MetadataUpdaterSupport>false</MetadataUpdaterSupport>
-		<UseNativeHttpHandler>true</UseNativeHttpHandler>
-		<UseSystemResourceKeys>true</UseSystemResourceKeys>
-
-		<EnableCppCLIHostActivation>false</EnableCppCLIHostActivation>
-
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-
-		<ApplicationIcon>icon.ico</ApplicationIcon>
 	</PropertyGroup>
 
 	<ItemGroup>

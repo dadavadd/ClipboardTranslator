@@ -12,7 +12,7 @@ try
 
     SetConsoleLoggingOption();
 
-    using var translator = new Translator(new ClipboardMonitor(),
+    using var translator = new Translator(new WindowsClipboardMonitor(),
                                           new AiTranslator(config));
 
     Console.WriteLine("Переводчик запущен. Нажмите Enter для завершения работы.");

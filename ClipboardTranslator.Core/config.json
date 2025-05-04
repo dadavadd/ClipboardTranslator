@@ -1,7 +1,7 @@
 {
     "TranslationMode": "Ai",
     "GeminiOptions": {
-        "ApiKey": "gemini_api_key",
+        "ApiKey": "",
         "ModelId": "gemini-1.5-flash-8b"
     },
     "LanguagePair": {

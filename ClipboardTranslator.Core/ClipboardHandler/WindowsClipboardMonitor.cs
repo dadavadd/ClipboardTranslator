@@ -10,13 +10,14 @@ using static Windows.Win32.PInvoke;
 
 namespace ClipboardTranslator.Core.ClipboardHandler;
 
-public unsafe class ClipboardMonitor : IClipboardMonitor
+public unsafe class WindowsClipboardMonitor : IClipboardMonitor
 {
     private readonly PCWSTR _className;
 
     private HWND _hwnd;
     private Thread? _messageLoopThread;
     private uint _messageLoopThreadId;
+    private bool _isDisposed;
 
     private const int WmClipboardUpdate = 0x031D;
     private const uint WmQuit = 0x0012;
@@ -25,12 +26,12 @@ public unsafe class ClipboardMonitor : IClipboardMonitor
 
     public event Func<string, Task>? ClipboardUpdate;
 
-    public ClipboardMonitor()
+    public WindowsClipboardMonitor()
     {
         fixed (char* firstChar = "Translator_" + Guid.NewGuid())
             _className = firstChar;
 
-        _messageLoopThread = new Thread(() =>
+        _messageLoopThread = new(() =>
         {
             _messageLoopThreadId = GetCurrentThreadId();
 
@@ -100,8 +101,18 @@ public unsafe class ClipboardMonitor : IClipboardMonitor
         if (msg == WmClipboardUpdate)
         {
             string text = InputSimulator.GetClipboardText();
+
             if (!string.IsNullOrEmpty(text))
-                _ = ClipboardUpdate?.Invoke(text);
+            {
+                try
+                {
+                    _ = ClipboardUpdate?.Invoke(text);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Ошибка в обработчике ClipboardUpdate");
+                }
+            }
 
             return (LRESULT)0;
         }
@@ -110,6 +121,10 @@ public unsafe class ClipboardMonitor : IClipboardMonitor
 
     public void Dispose()
     {
+        if (_isDisposed)
+            return;
+
+        _isDisposed = true;
         RemoveClipboardFormatListener(_hwnd);
         DestroyWindow(_hwnd);
         UnregisterClass(_className, GetModuleHandle((PCWSTR)null));
@@ -120,6 +135,6 @@ public unsafe class ClipboardMonitor : IClipboardMonitor
             _messageLoopThread?.Join();
         }
 
-        Log.Information($"Вызван Dispose у {nameof(ClipboardMonitor)}");
+        Log.Information($"Вызван Dispose у {nameof(WindowsClipboardMonitor)}");
     }
 }

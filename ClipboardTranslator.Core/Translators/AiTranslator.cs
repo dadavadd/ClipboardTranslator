@@ -32,41 +32,22 @@ public class AiTranslator(TranslatorConfig config, HttpClient? httpClient = null
 
     public async Task<string?> TranslateAsync(string text)
     {
-        try
-        {
-            var requestBody = CreateRequestBody(text);
-            var translatorResponse = await SendRequestAsync(requestBody);
-            string? responseStr = await CheckResponseAsync(translatorResponse);
+        var requestBody = CreateRequestBody(text);
+        var translatorResponse = await SendRequestAsync(requestBody);
+        string? responseStr = await CheckResponseAsync(translatorResponse);
 
-            if (responseStr == null)
-            {
-                Log.Warning("Ответ от API перевода пустой.");
-                return null;
-            }
+        if (responseStr == null)
+            throw new InvalidOperationException("Пустой ответ от API перевода.");
 
-            var response = JsonSerializer.Deserialize(responseStr, SerializationConfig.Default.Response);
+        var response = JsonSerializer.Deserialize(responseStr, SerializationConfig.Default.Response)
+                      ?? throw new InvalidOperationException("Не удалось десериализовать ответ от API перевода.");
 
-            if (response == null)
-            {
-                Log.Warning("Не удалось десериализовать ответ от API перевода.");
-                return null;
-            }
+        var result = response.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
 
-            var result = response.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
+        if (string.IsNullOrWhiteSpace(result))
+            throw new InvalidOperationException("Ответ от API перевода не содержит текста.");
 
-            if (string.IsNullOrWhiteSpace(result))
-            {
-                Log.Warning("Ответ от API перевода не содержит текста.");
-                return null;
-            }
-
-            return result;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Произошла ошибка при переводе текста: {Message}", ex.Message);
-            return null;
-        }
+        return result;
     }
 
     private async Task<HttpResponseMessage> SendRequestAsync(RequestBody? requestBody)
@@ -106,7 +87,7 @@ public class AiTranslator(TranslatorConfig config, HttpClient? httpClient = null
         string instruction = string.Concat(config.GeminiOptions.Instructions, sourceLang, targetLang);
 
         return new RequestBody(
-            new GenerationConfig(0, 1, 8192, "text/plain"),
+            new GenerationConfig(0.95, 40, 8192, "text/plain"),
             [new RequestContent("user", [new RequstPart(text)])],
             new RequestContent("user", [new RequstPart(instruction)])
         );
