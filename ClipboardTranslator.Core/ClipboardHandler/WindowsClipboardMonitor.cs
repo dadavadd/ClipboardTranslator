@@ -113,7 +113,6 @@ public unsafe class WindowsClipboardMonitor : IClipboardMonitor
                 return (LRESULT)0;
             }
 
-            Log.Information("Получен текст из буфера обмена: {Text}", text);
             try
             {
                 if (!_token.IsCancellationRequested)
