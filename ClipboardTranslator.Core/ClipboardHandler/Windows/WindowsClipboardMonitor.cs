@@ -144,22 +144,22 @@ public unsafe class WindowsClipboardMonitor : DisposableBase, IClipboardMonitor
 
     protected override void DisposeManaged()
     {
-        ThrowIfDisposed();
+        _tokenRegistration.Dispose();
+        _messageLoopThread?.Join();
 
+        Log.Information("WindowsClipboardMonitor.DisposeManaged вызван.");
+    }
+
+    protected override void DisposeUnmanaged()
+    {
         if (!_hwnd.IsNull)
         {
             RemoveClipboardFormatListener(_hwnd);
             DestroyWindow(_hwnd);
         }
 
-        if (_className.Value != null)
-        {
-            UnregisterClass(_className, GetModuleHandle((PCWSTR)null));
-        }
+        UnregisterClass(_className, GetModuleHandle((PCWSTR)null));
 
-        _messageLoopThread?.Join();
-        _tokenRegistration.Dispose();
-
-        Log.Information("WindowsClipboardMonitor.DisposeManaged вызван.");
+        Log.Information("WindowsClipboardMonitor.DisposeUnmanaged вызван.");
     }
 }
