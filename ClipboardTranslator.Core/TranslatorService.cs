@@ -3,7 +3,7 @@ using Serilog;
 
 namespace ClipboardTranslator.Core;
 
-public class TranslatorService : DisposableBase
+public class TranslatorService : IDisposable
 {
     private readonly IClipboardMonitor _monitor;
     private readonly ITranslator _translator;
@@ -41,7 +41,7 @@ public class TranslatorService : DisposableBase
         }
     }
 
-    protected override void DisposeManaged()
+    public void Dispose()
     {
         _monitor.Dispose();
         Log.Information("TranslatorService.DisposeManaged вызван");

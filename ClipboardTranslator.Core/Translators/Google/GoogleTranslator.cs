@@ -1,7 +1,6 @@
 ﻿using Serilog;
 using System.Text.Json;
 using ClipboardTranslator.Core.Configuration;
-using ClipboardTranslator.Core.Models;
 using System.Diagnostics;
 using ClipboardTranslator.Core.Interfaces;
 

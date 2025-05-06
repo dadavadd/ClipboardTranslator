@@ -1,5 +1,4 @@
-﻿using ClipboardTranslator.Core.Models;
-using ClipboardTranslator.Core.Configuration;
+﻿using ClipboardTranslator.Core.Configuration;
 using ClipboardTranslator.Core.Translators.Ai.Models.AiRequest;
 using System.Net.Http.Json;
 using System.Diagnostics;
@@ -30,7 +29,7 @@ public class AiTranslator(TranslatorConfig config,
         using var translatorResponse = await SendRequestAsync(requestBody, token);
         string responseStr = await CheckResponseAsync(translatorResponse, token);
 
-        var response = JsonSerializer.Deserialize(responseStr, SerializationConfig.Default.Response)
+        var response = JsonSerializer.Deserialize(responseStr, SerializationConfig.Default.AiResponseBody)
                       ?? throw new InvalidOperationException("Не удалось десериализовать ответ от API перевода.");
 
         var result = response.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
@@ -42,7 +41,7 @@ public class AiTranslator(TranslatorConfig config,
         return result;
     }
 
-    private async Task<HttpResponseMessage> SendRequestAsync(RequestBody? requestBody, CancellationToken token)
+    private async Task<HttpResponseMessage> SendRequestAsync(AiRequestBody? requestBody, CancellationToken token)
     {
         Log.Information("Запрос для перевода отправлен.");
 
@@ -50,7 +49,7 @@ public class AiTranslator(TranslatorConfig config,
 
         var translatorResponse = await _httpClient.PostAsJsonAsync(_translatorEndPoint,
                                                                    requestBody,
-                                                                   SerializationConfig.Default.RequestBody, token);
+                                                                   SerializationConfig.Default.AiRequestBody, token);
 
         stopWatch.Stop();
 
@@ -72,14 +71,18 @@ public class AiTranslator(TranslatorConfig config,
         return await response.Content.ReadAsStringAsync(token);
     }
 
-    private RequestBody CreateRequestBody(string text)
+    private AiRequestBody CreateRequestBody(string text)
     {
         string sourceLang = config.LanguagePair.SourceLang;
         string targetLang = config.LanguagePair.TargetLang;
         string instruction = string.Concat(config.GeminiOptions.Instructions, sourceLang, targetLang);
+        var generationOptions = config.GeminiOptions.GenerationOptions;
 
-        return new RequestBody(
-            new GenerationConfig(0.95, 40, 8192, "text/plain"),
+        return new AiRequestBody(
+            new GenerationConfig(generationOptions.TopP,
+                                 generationOptions.TopK,
+                                 generationOptions.MaxOutputTokens,
+                                 "text/plain"),
             [new RequestContent("user", [new RequstPart(text)])],
             new RequestContent("user", [new RequstPart(instruction)])
         );
