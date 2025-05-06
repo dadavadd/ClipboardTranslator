@@ -24,6 +24,7 @@ public unsafe class WindowsClipboardMonitor : DisposableBase, IClipboardMonitor
     private static readonly HWND HWNDMessage = new(-3);
 
     private CancellationToken _token;
+    private CancellationTokenRegistration _tokenRegistration;
 
     public event Func<string, Task>? ClipboardUpdate;
 
@@ -38,7 +39,7 @@ public unsafe class WindowsClipboardMonitor : DisposableBase, IClipboardMonitor
         {
             _messageLoopThreadId = GetCurrentThreadId();
 
-            _token.Register(() =>
+            _tokenRegistration = _token.Register(() =>
             {
                 PostThreadMessage(_messageLoopThreadId, WmQuit, 0, 0);
             });
@@ -146,6 +147,9 @@ public unsafe class WindowsClipboardMonitor : DisposableBase, IClipboardMonitor
         {
             UnregisterClass(_className, GetModuleHandle((PCWSTR)null));
         }
+
+        _messageLoopThread?.Join();
+        _tokenRegistration.Dispose();
 
         Log.Information($"WindowsClipboardMonitor.DisposeManaged вызван.");
     }

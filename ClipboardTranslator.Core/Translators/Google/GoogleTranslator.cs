@@ -9,7 +9,10 @@ namespace ClipboardTranslator.Core.Translators.Google;
 public class GoogleTranslator(TranslatorConfig config,
                               CancellationToken token = default) : BaseTranslator
 {
-    private readonly HttpClient _httpClient = new();
+    private static readonly HttpClient _httpClient = new()
+    {
+        Timeout = TimeSpan.FromSeconds(10)
+    };
 
     private string _translationEndPoint = "https://translate.googleapis.com/translate_a/" +
         $"single?client=gtx&sl={config.LanguagePair.SourceLang}" +
@@ -21,7 +24,7 @@ public class GoogleTranslator(TranslatorConfig config,
 
         string finalUrl = _translationEndPoint + Uri.EscapeDataString(text);
 
-        var response = await GetRequestAsync(finalUrl, token);
+        using var response = await GetRequestAsync(finalUrl, token);
         var responseStr = await CheckResponseAsync(response, token);
 
         var jsonResponse = JsonSerializer.Deserialize(responseStr, SerializationConfig.Default.JsonElement);
@@ -70,13 +73,5 @@ public class GoogleTranslator(TranslatorConfig config,
         }
 
         return translatedText;
-    }
-
-    protected override void DisposeManaged()
-    {
-        ThrowIfDisposed();
-
-        _httpClient.Dispose();
-        Log.Information("GoogleTranslator.DisposeManaged вызван.");
     }
 }

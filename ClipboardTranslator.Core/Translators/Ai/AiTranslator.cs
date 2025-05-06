@@ -11,7 +11,10 @@ namespace ClipboardTranslator.Core.Translators.Ai;
 public class AiTranslator(TranslatorConfig config,
                           CancellationToken token = default) : BaseTranslator
 {
-    private readonly HttpClient _httpClient = new();
+    private static readonly HttpClient _httpClient = new()
+    {
+        Timeout = TimeSpan.FromSeconds(10)
+    };
 
     private readonly string _translatorEndPoint =
         $"https://generativelanguage.googleapis.com/v1beta/models/"
@@ -23,7 +26,7 @@ public class AiTranslator(TranslatorConfig config,
         token.ThrowIfCancellationRequested();
 
         var requestBody = CreateRequestBody(text);
-        var translatorResponse = await SendRequestAsync(requestBody, token);
+        using var translatorResponse = await SendRequestAsync(requestBody, token);
         string responseStr = await CheckResponseAsync(translatorResponse, token);
 
         var response = JsonSerializer.Deserialize(responseStr, SerializationConfig.Default.Response)
@@ -32,7 +35,8 @@ public class AiTranslator(TranslatorConfig config,
         var result = response.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
 
         if (string.IsNullOrWhiteSpace(result))
-            throw new InvalidOperationException($"Ответ от API перевода не содержит переведённого текста. Ошибка от API: {response.Candidates?.FirstOrDefault()?.FinishReason}");
+            throw new InvalidOperationException($"Ответ от API перевода не содержит текста. Ответ: {responseStr}");
+
 
         return result;
     }
@@ -78,13 +82,5 @@ public class AiTranslator(TranslatorConfig config,
             [new RequestContent("user", [new RequstPart(text)])],
             new RequestContent("user", [new RequstPart(instruction)])
         );
-    }
-
-    protected override void DisposeManaged()
-    {
-        ThrowIfDisposed();
-
-        _httpClient.Dispose();
-        Log.Information("AiTranslator.Dispose вызван");
     }
 }
