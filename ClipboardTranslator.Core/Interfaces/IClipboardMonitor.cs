@@ -1,7 +1,6 @@
 ﻿namespace ClipboardTranslator.Core.Interfaces;
 
-public interface IClipboardMonitor
+public interface IClipboardMonitor : IDisposable
 {
-    event Func<string, Task>? ClipboardUpdate;
-    void Dispose();
+    event Func<string, IInputSimulator, Task>? ClipboardUpdate;
 }

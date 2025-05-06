@@ -1,5 +1,4 @@
-﻿using ClipboardTranslator.Core.ClipboardHandler;
-using ClipboardTranslator.Core.Configuration;
+﻿using ClipboardTranslator.Core.Configuration;
 using ClipboardTranslator.Core;
 using Serilog;
 
@@ -13,8 +12,11 @@ try
 
     var cts = new CancellationTokenSource();
 
-    var translator = TranslatorFactory.CreateTranslator(config, cts.Token);
-    using var translatorService = new TranslatorService(new WindowsClipboardMonitor(cts.Token), translator);
+    var inputSimulator = TranslatorPlatformFactory.CreateInputSimulator();
+    var clipboardMonitor = TranslatorPlatformFactory.CreateClipboardMonitor(inputSimulator, cts.Token);
+    var translator = TranslatorPlatformFactory.CreateTranslator(config, cts.Token);
+
+    using var translatorService = new TranslatorService(clipboardMonitor, translator);
 
     Console.WriteLine("Переводчик запущен. Нажмите Enter для завершения работы.");
     Console.ReadLine();

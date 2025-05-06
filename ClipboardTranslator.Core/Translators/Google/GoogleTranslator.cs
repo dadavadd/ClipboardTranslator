@@ -3,11 +3,12 @@ using System.Text.Json;
 using ClipboardTranslator.Core.Configuration;
 using ClipboardTranslator.Core.Models;
 using System.Diagnostics;
+using ClipboardTranslator.Core.Interfaces;
 
 namespace ClipboardTranslator.Core.Translators.Google;
 
 public class GoogleTranslator(TranslatorConfig config,
-                              CancellationToken token = default) : BaseTranslator
+                              CancellationToken token = default) : ITranslator
 {
     private static readonly HttpClient _httpClient = new()
     {
@@ -18,7 +19,7 @@ public class GoogleTranslator(TranslatorConfig config,
         $"single?client=gtx&sl={config.LanguagePair.SourceLang}" +
         $"&tl={config.LanguagePair.TargetLang}&dt=t&q=";
 
-    public async override Task<string?> TranslateAsync(string text)
+    public async Task<string?> TranslateAsync(string text)
     {
         token.ThrowIfCancellationRequested();
 

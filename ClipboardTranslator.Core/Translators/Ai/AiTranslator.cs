@@ -5,11 +5,12 @@ using System.Net.Http.Json;
 using System.Diagnostics;
 using System.Text.Json;
 using Serilog;
+using ClipboardTranslator.Core.Interfaces;
 
 namespace ClipboardTranslator.Core.Translators.Ai;
 
 public class AiTranslator(TranslatorConfig config,
-                          CancellationToken token = default) : BaseTranslator
+                          CancellationToken token = default) : ITranslator
 {
     private static readonly HttpClient _httpClient = new()
     {
@@ -21,7 +22,7 @@ public class AiTranslator(TranslatorConfig config,
         + $"{config.GeminiOptions.ModelId}:generateContent"
         + $"?key={config.GeminiOptions.ApiKey}";
 
-    public override async Task<string?> TranslateAsync(string text)
+    public async Task<string?> TranslateAsync(string text)
     {
         token.ThrowIfCancellationRequested();
 

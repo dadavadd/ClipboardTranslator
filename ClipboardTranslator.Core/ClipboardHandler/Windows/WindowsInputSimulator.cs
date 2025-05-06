@@ -6,13 +6,14 @@ using Serilog;
 using static Windows.Win32.PInvoke;
 using static Windows.Win32.UI.Input.KeyboardAndMouse.KEYBD_EVENT_FLAGS;
 using static Windows.Win32.UI.Input.KeyboardAndMouse.INPUT_TYPE;
+using ClipboardTranslator.Core.Interfaces;
 
-namespace ClipboardTranslator.Core.ClipboardHandler;
+namespace ClipboardTranslator.Core.ClipboardHandler.Windows;
 
-public class InputSimulator
+internal class WindowsInputSimulator : IInputSimulator
 {
     private const uint UnicodeText = 13;
-    internal static string GetClipboardText()
+    public string GetClipboardText()
     {
         if (!OpenClipboard(HWND.Null))
         {
@@ -54,7 +55,7 @@ public class InputSimulator
         }
     }
 
-    internal static bool SimulateTextInput(string text)
+    public bool SimulateTextInput(string text)
     {
         if (string.IsNullOrEmpty(text))
             return true;
@@ -69,7 +70,7 @@ public class InputSimulator
                     wScan = c,
                     dwFlags = flags,
                     time = 0,
-                    dwExtraInfo = (nuint)IntPtr.Zero
+                    dwExtraInfo = (nuint)nint.Zero
                 }
             }
         };

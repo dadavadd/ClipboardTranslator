@@ -1,6 +1,4 @@
-﻿using ClipboardTranslator.Core.ClipboardHandler;
-using ClipboardTranslator.Core.Interfaces;
-using ClipboardTranslator.Core.Translators;
+﻿using ClipboardTranslator.Core.Interfaces;
 using Serilog;
 
 namespace ClipboardTranslator.Core;
@@ -8,10 +6,10 @@ namespace ClipboardTranslator.Core;
 public class TranslatorService : DisposableBase
 {
     private readonly IClipboardMonitor _monitor;
-    private readonly BaseTranslator _translator;
+    private readonly ITranslator _translator;
 
     public TranslatorService(IClipboardMonitor monitor,
-                      BaseTranslator translator,
+                      ITranslator translator,
                       CancellationToken token = default)
     {
         _monitor = monitor;
@@ -20,7 +18,7 @@ public class TranslatorService : DisposableBase
         _monitor.ClipboardUpdate += OnClipboardUpdate;
     }
 
-    private async Task OnClipboardUpdate(string text)
+    private async Task OnClipboardUpdate(string text, IInputSimulator inputSimulator)
     {
         try
         {
@@ -35,7 +33,7 @@ public class TranslatorService : DisposableBase
             translatedText = translatedText.TrimEnd('\n', '\r');
             Log.Information("Перевод завершён: {translatedText}", translatedText);
 
-            InputSimulator.SimulateTextInput(translatedText);
+            inputSimulator.SimulateTextInput(translatedText);
         }
         catch (Exception ex)
         {
@@ -46,7 +44,6 @@ public class TranslatorService : DisposableBase
     protected override void DisposeManaged()
     {
         _monitor.Dispose();
-        _translator.Dispose();
         Log.Information("TranslatorService.DisposeManaged вызван");
     } 
 }
