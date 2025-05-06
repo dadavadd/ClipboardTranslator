@@ -1,3 +1,3 @@
-﻿namespace ClipboardTranslator.Core.Translators.Models;
+﻿namespace ClipboardTranslator.Core.Translators;
 
 public record GeminiOptions(string ApiKey, string ModelId, string Instructions);

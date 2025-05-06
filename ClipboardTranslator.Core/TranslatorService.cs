@@ -1,15 +1,18 @@
 ﻿using ClipboardTranslator.Core.ClipboardHandler;
 using ClipboardTranslator.Core.Interfaces;
+using ClipboardTranslator.Core.Translators;
 using Serilog;
 
 namespace ClipboardTranslator.Core;
 
-public class Translator : IDisposable
+public class TranslatorService : DisposableBase
 {
     private readonly IClipboardMonitor _monitor;
-    private readonly ITranslator _translator;
+    private readonly BaseTranslator _translator;
 
-    public Translator(IClipboardMonitor monitor, ITranslator translator)
+    public TranslatorService(IClipboardMonitor monitor,
+                      BaseTranslator translator,
+                      CancellationToken token = default)
     {
         _monitor = monitor;
         _translator = translator;
@@ -21,7 +24,7 @@ public class Translator : IDisposable
     {
         try
         {
-            Log.Information($"Получен текст из буфера обмена: {text}");
+            Log.Information("Получен текст из буфера обмена: {text}", text);
             string? translatedText = await _translator.TranslateAsync(text);
             if (string.IsNullOrEmpty(translatedText))
             {
@@ -29,8 +32,8 @@ public class Translator : IDisposable
                 return;
             }
 
-            translatedText = translatedText.TrimEnd('\n');
-            Log.Information($"Перевод завершён: {text}");
+            translatedText = translatedText.TrimEnd('\n', '\r');
+            Log.Information("Перевод завершён: {translatedText}", translatedText);
 
             InputSimulator.SimulateTextInput(translatedText);
         }
@@ -40,9 +43,10 @@ public class Translator : IDisposable
         }
     }
 
-    public void Dispose()
+    protected override void DisposeManaged()
     {
         _monitor.Dispose();
         _translator.Dispose();
-    }
+        Log.Information("TranslatorService.DisposeManaged вызван");
+    } 
 }

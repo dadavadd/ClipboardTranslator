@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using ClipboardTranslator.Core.Models;
-using ClipboardTranslator.Core.Translators.Models;
+using ClipboardTranslator.Core.Translators;
 
 namespace ClipboardTranslator.Core.Configuration;
 

@@ -10,14 +10,13 @@ using static Windows.Win32.PInvoke;
 
 namespace ClipboardTranslator.Core.ClipboardHandler;
 
-public unsafe class WindowsClipboardMonitor : IClipboardMonitor
+public unsafe class WindowsClipboardMonitor : DisposableBase, IClipboardMonitor
 {
     private readonly PCWSTR _className;
 
     private HWND _hwnd;
     private Thread? _messageLoopThread;
     private uint _messageLoopThreadId;
-    private bool _isDisposed;
 
     private const int WmClipboardUpdate = 0x031D;
     private const uint WmQuit = 0x0012;
@@ -38,6 +37,11 @@ public unsafe class WindowsClipboardMonitor : IClipboardMonitor
         _messageLoopThread = new(() =>
         {
             _messageLoopThreadId = GetCurrentThreadId();
+
+            _token.Register(() =>
+            {
+                PostThreadMessage(_messageLoopThreadId, WmQuit, 0, 0);
+            });
 
             var wcex = new WNDCLASSEXW
             {
@@ -86,7 +90,7 @@ public unsafe class WindowsClipboardMonitor : IClipboardMonitor
 
             Log.Information("Класс ClipboardMonitor успешно инициализирован.");
 
-            while (GetMessage(out var msg, HWND.Null, 0, 0) > 0 && !_token.IsCancellationRequested)
+            while (GetMessage(out var msg, HWND.Null, 0, 0) > 0)
             {
                 TranslateMessage(in msg);
                 DispatchMessage(in msg);
@@ -128,23 +132,21 @@ public unsafe class WindowsClipboardMonitor : IClipboardMonitor
         return DefWindowProc(hwnd, msg, wParam, lParam);
     }
 
-    public void Dispose()
+    protected override void DisposeManaged()
     {
-        if (_isDisposed)
-            return;
+        ThrowIfDisposed();
 
-        _isDisposed = true;
-
-        RemoveClipboardFormatListener(_hwnd);
-        DestroyWindow(_hwnd);
-        UnregisterClass(_className, GetModuleHandle((PCWSTR)null));
-
-        if (_messageLoopThreadId != 0)
+        if (!_hwnd.IsNull)
         {
-            PostThreadMessage(_messageLoopThreadId, WmQuit, 0, 0);
-            _messageLoopThread?.Join();
+            RemoveClipboardFormatListener(_hwnd);
+            DestroyWindow(_hwnd);
         }
 
-        Log.Information($"Вызван Dispose у {nameof(WindowsClipboardMonitor)}");
+        if (_className.Value != null)
+        {
+            UnregisterClass(_className, GetModuleHandle((PCWSTR)null));
+        }
+
+        Log.Information($"WindowsClipboardMonitor.DisposeManaged вызван.");
     }
 }

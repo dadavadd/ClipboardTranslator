@@ -1,46 +1,30 @@
 ﻿using ClipboardTranslator.Core.Models;
 using ClipboardTranslator.Core.Configuration;
-using ClipboardTranslator.Core.Translators.Models.AiRequest;
-using ClipboardTranslator.Core.Interfaces;
+using ClipboardTranslator.Core.Translators.Ai.Models.AiRequest;
 using System.Net.Http.Json;
 using System.Diagnostics;
 using System.Text.Json;
 using Serilog;
 
-namespace ClipboardTranslator.Core.Translators;
+namespace ClipboardTranslator.Core.Translators.Ai;
 
 public class AiTranslator(TranslatorConfig config,
-                          CancellationToken token = default) : ITranslator
+                          CancellationToken token = default) : BaseTranslator
 {
-    private readonly HttpClient _httpClient = new (new SocketsHttpHandler
-    {
-        MaxConnectionsPerServer = 20,
-        PooledConnectionIdleTimeout = TimeSpan.FromSeconds(30),
-        PooledConnectionLifetime = TimeSpan.FromMinutes(5),
-
-        KeepAlivePingDelay = TimeSpan.FromSeconds(30),
-        KeepAlivePingTimeout = TimeSpan.FromSeconds(10),
-        KeepAlivePingPolicy = HttpKeepAlivePingPolicy.Always,
-    })
-    {
-        DefaultRequestVersion = new(2, 0)
-    };
+    private readonly HttpClient _httpClient = new();
 
     private readonly string _translatorEndPoint =
         $"https://generativelanguage.googleapis.com/v1beta/models/"
         + $"{config.GeminiOptions.ModelId}:generateContent"
         + $"?key={config.GeminiOptions.ApiKey}";
 
-    public async Task<string?> TranslateAsync(string text)
+    public override async Task<string?> TranslateAsync(string text)
     {
         token.ThrowIfCancellationRequested();
 
         var requestBody = CreateRequestBody(text);
         var translatorResponse = await SendRequestAsync(requestBody, token);
-        string? responseStr = await CheckResponseAsync(translatorResponse, token);
-
-        if (responseStr == null)
-            throw new InvalidOperationException("Пустой ответ от API перевода.");
+        string responseStr = await CheckResponseAsync(translatorResponse, token);
 
         var response = JsonSerializer.Deserialize(responseStr, SerializationConfig.Default.Response)
                       ?? throw new InvalidOperationException("Не удалось десериализовать ответ от API перевода.");
@@ -70,14 +54,14 @@ public class AiTranslator(TranslatorConfig config,
         return translatorResponse;
     }
 
-    private async Task<string?> CheckResponseAsync(HttpResponseMessage response, CancellationToken token)
+    private async Task<string> CheckResponseAsync(HttpResponseMessage response, CancellationToken token)
     {
         if (!response.IsSuccessStatusCode)
         {
             var errorResponse = await response.Content.ReadAsStringAsync(token);
             Log.Warning("Ошибка при запросе к API: {StatusCode}", response.StatusCode);
             Log.Warning("Ответ с ошибкой: {errorResponse}", errorResponse);
-            return null;
+            throw new InvalidOperationException("Пустой ответ от API перевода.");
         }
 
         return await response.Content.ReadAsStringAsync(token);
@@ -96,9 +80,11 @@ public class AiTranslator(TranslatorConfig config,
         );
     }
 
-    public void Dispose()
+    protected override void DisposeManaged()
     {
+        ThrowIfDisposed();
+
         _httpClient.Dispose();
-        Log.Information($"Вызван Dispose у {nameof(AiTranslator)}");
+        Log.Information("AiTranslator.Dispose вызван");
     }
 }
