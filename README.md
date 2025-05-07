@@ -33,6 +33,7 @@ ClipboardTranslator — это легковесное приложение дл�
         "ApiKey": "",
         "ModelId": "gemini-1.5-flash-8b",
         "GenerationOptions": {
+            "Temperature": 2
             "TopP": 0.95,
             "TopK": 40,
             "MaxOutputTokens": 8192
