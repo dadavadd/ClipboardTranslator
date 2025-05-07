@@ -11,9 +11,13 @@
 
 	<PropertyGroup>
 		<PublishAot>true</PublishAot>
+		<IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
 		<InvariantGlobalization>true</InvariantGlobalization>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<IlcDehydrate>false</IlcDehydrate>
+		<IlcDehydrate>true</IlcDehydrate>
+		<Optimize>true</Optimize>
+		<OptimizationPreference>Speed</OptimizationPreference>
+		<IlcDisableReflection>true</IlcDisableReflection>
 		<LangVersion>preview</LangVersion>
 	</PropertyGroup>
 

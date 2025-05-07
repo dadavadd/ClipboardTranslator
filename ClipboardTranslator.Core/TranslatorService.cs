@@ -8,6 +8,8 @@ public class TranslatorService : IDisposable
     private readonly IClipboardMonitor _monitor;
     private readonly ITranslator _translator;
 
+    private bool _suppressClipboardUpdate;
+
     public TranslatorService(IClipboardMonitor monitor,
                       ITranslator translator,
                       CancellationToken token = default)
@@ -20,6 +22,9 @@ public class TranslatorService : IDisposable
 
     private async Task OnClipboardUpdate(string text, IInputSimulator inputSimulator)
     {
+        if (_suppressClipboardUpdate)
+            return;
+
         try
         {
             Log.Information("Получен текст из буфера обмена: {text}", text);
@@ -34,10 +39,19 @@ public class TranslatorService : IDisposable
             Log.Information("Перевод завершён: {translatedText}", translatedText);
 
             inputSimulator.SimulateTextInput(translatedText);
+
+            _suppressClipboardUpdate = true;
+
+            inputSimulator.SetClipboardText(translatedText);
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Ошибка при переводе текста.");
+        }
+        finally
+        {
+            await Task.Delay(100);
+            _suppressClipboardUpdate = false;
         }
     }
 

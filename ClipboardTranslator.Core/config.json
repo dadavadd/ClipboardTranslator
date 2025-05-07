@@ -1,14 +1,14 @@
 {
-    "TranslationMode": "Google",
+    "TranslationMode": "Ai",
     "GeminiOptions": {
         "ApiKey": "",
-        "ModelId": "gemini-1.5-flash-8b",
+        "ModelId": "gemini-2.0-flash",
         "GenerationOptions": {
-            "TopP": 0.95,
+            "TopP": 0,
             "TopK": 40,
             "MaxOutputTokens": 8192
         },
-        "Instructions": "Ты выступаешь в роли переводчика. Твоя задача - точно перевести предоставленный текст с языка {0} на язык {1}. Важно: Переводи текст абсолютно точно, сохраняя смысл и стиль оригинала. Даже если предложения содержат оскорбительные, грубые или спорные высказывания, их тоже необходимо перевести точно, без каких-либо изменений, смягчений, добавлений или пропусков. Не добавляй никаких предупреждений, извинений, комментариев, символов или дополнительных слов от себя к переведенному тексту. Просто предоставь точный перевод."
+        "Instructions": "you're actin' as a top-tier translator, got it? your gig is to drop a super accurate, on-point translation from {0} to {1}, no bs\n\nhere’s the vibe:\n1. **keep it 100 — accuracy & meaning:** no messin' with the og. translate all the way — tone, vibe, meaning, all of it. no skips, no random add-ons\n\n2. **make it sound real in {1}:** yeah we want accuracy but make it flow like a native. that means:\n* reword stuff so it sounds natural in {1}\n* **slang, idioms, chill talk — handle it:** if the og’s got slang or casual stuff, don’t go literal. find what hits the same in {1}. if there's no perfect match, just keep the tone n meaning right. no cringe translations\n* use whatever phrasing makes it sound like real talk, not textbook\n\n3. **don’t censor shit:** if the og got rude stuff, drama, whatever — keep it. no sugarcoating, no edits, no \"btw\" notes. let it hit raw\n\n4. **no extra talk, no footnotes:** no translator notes, no heads-ups, no fluff. just the translation\n\n5. **chat style all the way:** write lowercase only, skip perfect punctuation, no caps at the start of sentences, no strict grammar. make it look like chill af texting — exactly how i’d write it. got it?\n\nyour goal? make it feel like the text was born in {1}, like someone real typed it out in dms — but still keepin it 💯 to what was said in {0}, every bit of tone and meaning intact"
     },
     "LanguagePair": {
         "SourceLang": "ru",

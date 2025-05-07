@@ -1,18 +1,20 @@
 ﻿using Windows.Win32.UI.Input.KeyboardAndMouse;
 using System.Runtime.InteropServices;
 using Windows.Win32.Foundation;
+using ClipboardTranslator.Core.Interfaces;
 using Serilog;
 
 using static Windows.Win32.PInvoke;
+using static Windows.Win32.System.Memory.GLOBAL_ALLOC_FLAGS;
 using static Windows.Win32.UI.Input.KeyboardAndMouse.KEYBD_EVENT_FLAGS;
 using static Windows.Win32.UI.Input.KeyboardAndMouse.INPUT_TYPE;
-using ClipboardTranslator.Core.Interfaces;
 
 namespace ClipboardTranslator.Core.ClipboardHandler.Windows;
 
-internal class WindowsInputSimulator : IInputSimulator
+internal unsafe class WindowsInputSimulator : IInputSimulator
 {
     private const uint UnicodeText = 13;
+
     public string GetClipboardText()
     {
         if (!OpenClipboard(HWND.Null))
@@ -36,13 +38,11 @@ internal class WindowsInputSimulator : IInputSimulator
                 return string.Empty;
             }
 
-            unsafe
-            {
-                var dataGlobal = (HGLOBAL)clipboardData.Value;
-                var dataPtr = GlobalLock(dataGlobal);
+            var dataGlobal = (HGLOBAL)clipboardData.Value;
+            var dataPtr = GlobalLock(dataGlobal);
 
-                return Marshal.PtrToStringUni((nint)dataPtr) ?? string.Empty;
-            }
+            return Marshal.PtrToStringUni((nint)dataPtr) ?? string.Empty;
+
         }
         catch (Exception ex)
         {
@@ -54,6 +54,64 @@ internal class WindowsInputSimulator : IInputSimulator
             CloseClipboard();
         }
     }
+
+    public bool SetClipboardText(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return false;
+
+        if (!OpenClipboard(HWND.Null))
+        {
+            Log.Warning("Не удалось открыть буфер обмена.");
+            return false;
+        }
+
+        try
+        {
+            if (!EmptyClipboard())
+            {
+                Log.Warning("Не удалось очистить буфер обмена.");
+                return false;
+            }
+
+            int sizeInBytes = (text.Length + 1) * sizeof(char);
+            HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, (nuint)sizeInBytes);
+            if (hMem.IsNull)
+                return false;
+
+
+            void* ptr = GlobalLock(hMem);
+            if (ptr == null)
+            {
+                GlobalFree(hMem);
+                return false;
+            }
+
+            fixed (char* src = text)
+                Buffer.MemoryCopy(src, ptr, sizeInBytes, sizeInBytes);
+
+            GlobalUnlock(hMem);
+
+
+            if (SetClipboardData(UnicodeText, (HANDLE)hMem.Value).IsNull)
+            {
+                GlobalFree(hMem);
+                return false;
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Ошибка при вставке текста в буфер обмена.");
+            return false;
+        }
+        finally
+        {
+            CloseClipboard();
+        }
+    }
+
 
     public bool SimulateTextInput(string text)
     {

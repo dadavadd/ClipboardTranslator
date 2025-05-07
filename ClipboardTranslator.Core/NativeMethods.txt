@@ -7,9 +7,12 @@ OpenClipboard
 CloseClipboard
 GetClipboardData
 IsClipboardFormatAvailable
+SetClipboardData
+EmptyClipboard
 GlobalUnlock
 GlobalLock
 SendInput
+GlobalAlloc
 
 RegisterClassExW
 CreateWindowExW
