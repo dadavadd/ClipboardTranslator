@@ -42,12 +42,6 @@ internal unsafe class WindowsInputSimulator : IInputSimulator
             var dataPtr = GlobalLock(dataGlobal);
 
             return Marshal.PtrToStringUni((nint)dataPtr) ?? string.Empty;
-
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Ошибка при чтении текста из буфера обмена.");
-            return string.Empty;
         }
         finally
         {
@@ -58,7 +52,7 @@ internal unsafe class WindowsInputSimulator : IInputSimulator
     public bool SetClipboardText(string text)
     {
         if (string.IsNullOrEmpty(text))
-            return false;
+            throw new ArgumentException("Текст не может быть пустым.", nameof(text));
 
         if (!OpenClipboard(HWND.Null))
         {
@@ -77,14 +71,13 @@ internal unsafe class WindowsInputSimulator : IInputSimulator
             int sizeInBytes = (text.Length + 1) * sizeof(char);
             HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, (nuint)sizeInBytes);
             if (hMem.IsNull)
-                return false;
-
+                throw new InvalidOperationException("Не удалось выделить память для текста.");
 
             void* ptr = GlobalLock(hMem);
             if (ptr == null)
             {
                 GlobalFree(hMem);
-                return false;
+                throw new InvalidOperationException("Не удалось зафиксировать память.");
             }
 
             fixed (char* src = text)
@@ -92,26 +85,19 @@ internal unsafe class WindowsInputSimulator : IInputSimulator
 
             GlobalUnlock(hMem);
 
-
             if (SetClipboardData(UnicodeText, (HANDLE)hMem.Value).IsNull)
             {
                 GlobalFree(hMem);
-                return false;
+                throw new InvalidOperationException("Не удалось установить данные в буфер обмена.");
             }
 
             return true;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Ошибка при вставке текста в буфер обмена.");
-            return false;
         }
         finally
         {
             CloseClipboard();
         }
     }
-
 
     public bool SimulateTextInput(string text)
     {
@@ -144,6 +130,10 @@ internal unsafe class WindowsInputSimulator : IInputSimulator
             fixed (INPUT* pInputs = inputs)
             {
                 uint result = SendInput((uint)inputs.Length, pInputs, sizeof(INPUT));
+                if (result == 0)
+                {
+                    throw new InvalidOperationException("Не удалось отправить симулированный ввод.");
+                }
             }
         }
 

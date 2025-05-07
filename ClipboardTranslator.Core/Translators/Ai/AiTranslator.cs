@@ -75,11 +75,12 @@ public class AiTranslator(TranslatorConfig config,
     {
         string sourceLang = config.LanguagePair.SourceLang;
         string targetLang = config.LanguagePair.TargetLang;
-        string instruction = string.Concat(config.GeminiOptions.Instructions, sourceLang, targetLang);
+        string instruction = string.Format(config.GeminiOptions.Instructions, sourceLang, targetLang);
         var generationOptions = config.GeminiOptions.GenerationOptions;
 
         return new AiRequestBody(
-            new GenerationConfig(generationOptions.TopP,
+            new GenerationConfig(generationOptions.Temperature,
+                                 generationOptions.TopP,
                                  generationOptions.TopK,
                                  generationOptions.MaxOutputTokens,
                                  "text/plain"),

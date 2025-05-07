@@ -4,6 +4,7 @@
         "ApiKey": "",
         "ModelId": "gemini-2.0-flash",
         "GenerationOptions": {
+            "Temperature": 0,
             "TopP": 0,
             "TopK": 40,
             "MaxOutputTokens": 8192
