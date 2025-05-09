@@ -8,6 +8,7 @@ using static Windows.Win32.PInvoke;
 using static Windows.Win32.System.Memory.GLOBAL_ALLOC_FLAGS;
 using static Windows.Win32.UI.Input.KeyboardAndMouse.KEYBD_EVENT_FLAGS;
 using static Windows.Win32.UI.Input.KeyboardAndMouse.INPUT_TYPE;
+using static Windows.Win32.UI.Input.KeyboardAndMouse.VIRTUAL_KEY;
 
 namespace ClipboardTranslator.Core.ClipboardHandler.Windows;
 
@@ -104,7 +105,7 @@ internal unsafe class WindowsInputSimulator : IInputSimulator
         if (string.IsNullOrEmpty(text))
             return true;
 
-        static INPUT Make(char c, KEYBD_EVENT_FLAGS flags) => new()
+        static INPUT MakeUnicode(char c, KEYBD_EVENT_FLAGS flags) => new()
         {
             type = INPUT_KEYBOARD,
             Anonymous = new INPUT._Anonymous_e__Union
@@ -114,28 +115,51 @@ internal unsafe class WindowsInputSimulator : IInputSimulator
                     wScan = c,
                     dwFlags = flags,
                     time = 0,
-                    dwExtraInfo = (nuint)nint.Zero
+                    dwExtraInfo = 0
                 }
             }
         };
 
-        var inputs = text
-            .SelectMany(static c => new[] {
-                Make(c, KEYEVENTF_UNICODE),
-                Make(c, KEYEVENTF_UNICODE | KEYEVENTF_KEYUP)})
-            .ToArray();
-
-        unsafe
+        static INPUT MakeVirtualKey(VIRTUAL_KEY vk, KEYBD_EVENT_FLAGS flags) => new()
         {
-            fixed (INPUT* pInputs = inputs)
+            type = INPUT_KEYBOARD,
+            Anonymous = new INPUT._Anonymous_e__Union
             {
-                uint result = SendInput((uint)inputs.Length, pInputs, sizeof(INPUT));
-                if (result == 0)
+                ki = new()
                 {
-                    throw new InvalidOperationException("Не удалось отправить симулированный ввод.");
+                    wVk = vk,
+                    dwFlags = flags,
+                    time = 0,
+                    dwExtraInfo = 0
                 }
             }
+        };
+
+        var inputs = new List<INPUT>();
+
+        foreach (char c in text)
+        {
+            if (c == '\n')
+            {
+                inputs.Add(MakeVirtualKey(VK_LSHIFT, 0));
+                inputs.Add(MakeVirtualKey(VK_RETURN, 0));
+                inputs.Add(MakeVirtualKey(VK_RETURN, KEYEVENTF_KEYUP));
+                inputs.Add(MakeVirtualKey(VK_LSHIFT, KEYEVENTF_KEYUP));
+            }
+            else
+            {
+                inputs.Add(MakeUnicode(c, KEYEVENTF_UNICODE));
+                inputs.Add(MakeUnicode(c, KEYEVENTF_UNICODE | KEYEVENTF_KEYUP));
+            }
         }
+
+        fixed (INPUT* pInputs = inputs.ToArray())
+        {
+            uint result = SendInput((uint)inputs.Count, pInputs, sizeof(INPUT));
+            if (result == 0)
+                throw new InvalidOperationException("Не удалось отправить симулированный ввод.");
+        }
+
 
         return true;
     }

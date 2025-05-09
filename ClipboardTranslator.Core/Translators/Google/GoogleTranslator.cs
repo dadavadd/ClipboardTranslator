@@ -3,6 +3,7 @@ using System.Text.Json;
 using ClipboardTranslator.Core.Configuration;
 using System.Diagnostics;
 using ClipboardTranslator.Core.Interfaces;
+using ClipboardTranslator.Core.Exceptions;
 
 namespace ClipboardTranslator.Core.Translators.Google;
 
@@ -54,7 +55,7 @@ public class GoogleTranslator(TranslatorConfig config,
             var errorResponse = await response.Content.ReadAsStringAsync(token);
             Log.Warning("Ошибка при запросе к API: {StatusCode}", response.StatusCode);
             Log.Warning("Ответ с ошибкой: {errorResponse}", errorResponse);
-            throw new InvalidOperationException("Пустой ответ от API перевода.");
+            throw new TranslatorException("Пустой ответ от API перевода.");
         }
 
         return await response.Content.ReadAsStringAsync(token);

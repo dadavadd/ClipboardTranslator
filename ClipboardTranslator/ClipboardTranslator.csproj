@@ -14,10 +14,11 @@
 		<IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
 		<InvariantGlobalization>true</InvariantGlobalization>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<IlcDehydrate>true</IlcDehydrate>
+		<IlcDehydrate>false</IlcDehydrate>
 		<Optimize>true</Optimize>
 		<OptimizationPreference>Speed</OptimizationPreference>
 		<IlcDisableReflection>true</IlcDisableReflection>
+		<UseSizeOptimizedLinq>false</UseSizeOptimizedLinq>
 		<LangVersion>preview</LangVersion>
 	</PropertyGroup>
 

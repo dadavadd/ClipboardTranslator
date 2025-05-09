@@ -1,10 +1,11 @@
 ﻿using ClipboardTranslator.Core.Configuration;
+using ClipboardTranslator.Core.Interfaces;
 using ClipboardTranslator.Core.Translators.Ai.Models.AiRequest;
 using System.Net.Http.Json;
 using System.Diagnostics;
 using System.Text.Json;
 using Serilog;
-using ClipboardTranslator.Core.Interfaces;
+using ClipboardTranslator.Core.Exceptions;
 
 namespace ClipboardTranslator.Core.Translators.Ai;
 
@@ -24,21 +25,16 @@ public class AiTranslator(TranslatorConfig config,
     public async Task<string?> TranslateAsync(string text)
     {
         token.ThrowIfCancellationRequested();
-
         var requestBody = CreateRequestBody(text);
         using var translatorResponse = await SendRequestAsync(requestBody, token);
         string responseStr = await CheckResponseAsync(translatorResponse, token);
 
         var response = JsonSerializer.Deserialize(responseStr, SerializationConfig.Default.AiResponseBody)
-                      ?? throw new InvalidOperationException("Не удалось десериализовать ответ от API перевода.");
+                      ?? throw new TranslatorException("Не удалось десериализовать ответ от API перевода.");
 
         var result = response.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
 
-        if (string.IsNullOrWhiteSpace(result))
-            throw new InvalidOperationException($"Ответ от API перевода не содержит текста. Ответ: {responseStr}");
-
-
-        return result;
+        return !string.IsNullOrWhiteSpace(result) ? result : throw new TranslatorException($"Ответ от API перевода не содержит текста. Ответ: {responseStr}");
     }
 
     private async Task<HttpResponseMessage> SendRequestAsync(AiRequestBody? requestBody, CancellationToken token)
@@ -65,7 +61,7 @@ public class AiTranslator(TranslatorConfig config,
             var errorResponse = await response.Content.ReadAsStringAsync(token);
             Log.Warning("Ошибка при запросе к API: {StatusCode}", response.StatusCode);
             Log.Warning("Ответ с ошибкой: {errorResponse}", errorResponse);
-            throw new InvalidOperationException("Пустой ответ от API перевода.");
+            throw new TranslatorException("Пустой ответ от API перевода.");
         }
 
         return await response.Content.ReadAsStringAsync(token);

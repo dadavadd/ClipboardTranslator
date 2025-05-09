@@ -27,7 +27,9 @@ public class TranslatorService : IDisposable
 
         try
         {
-            Log.Information("Получен текст из буфера обмена: {text}", text);
+            Log.Information("Получен текст из буфера обмена: {text}",
+                            text.Replace("\r", " ").Replace("\n", " "));
+
             string? translatedText = await _translator.TranslateAsync(text);
             if (string.IsNullOrEmpty(translatedText))
             {
@@ -36,7 +38,9 @@ public class TranslatorService : IDisposable
             }
 
             translatedText = translatedText.TrimEnd('\n', '\r');
-            Log.Information("Перевод завершён: {translatedText}", translatedText);
+
+            Log.Information("Перевод завершён: {translatedText}",
+                            translatedText.Replace("\r", " ").Replace("\n", " "));
 
             inputSimulator.SimulateTextInput(translatedText);
 

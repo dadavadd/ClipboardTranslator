@@ -1,7 +1,8 @@
 {
+    "Proxy": "None", /* http://username:password@host:port или http://host:port или socks5://user:pass@host:port */
     "TranslationMode": "Ai",
     "GeminiOptions": {
-        "ApiKey": "",
+        "ApiKey": "AIzaSyAuHk-p7AJt5ajGB36Ut8IHxVSw_G2ObO8",
         "ModelId": "gemini-2.0-flash",
         "GenerationOptions": {
             "Temperature": 0,

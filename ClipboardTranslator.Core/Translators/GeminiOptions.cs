@@ -1,6 +1,9 @@
 ﻿namespace ClipboardTranslator.Core.Translators;
 
-public record GeminiOptions(string ApiKey,
-                            string ModelId,
-                            GenerationOptions GenerationOptions,
-                            string Instructions);
+public class GeminiOptions
+{
+    public required string ApiKey { get; set; }
+    public required string ModelId { get; set; }
+    public required GenerationOptions GenerationOptions { get; set; }
+    public required string Instructions { get; set; }
+}

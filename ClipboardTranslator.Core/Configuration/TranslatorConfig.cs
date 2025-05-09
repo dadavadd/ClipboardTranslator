@@ -1,26 +1,32 @@
-﻿using System.Text.Json;
+﻿using System.Net;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using ClipboardTranslator.Core.Translators;
 
 namespace ClipboardTranslator.Core.Configuration;
 
-public record TranslatorConfig(string TranslationMode,
-                               GeminiOptions GeminiOptions,
-                               LanguagePair LanguagePair)
+public partial class TranslatorConfig
 {
+    public required string Proxy { get; set; } 
+    public required string TranslationMode { get; set; }
+    public required GeminiOptions GeminiOptions { get; set; }
+    public required LanguagePair LanguagePair { get; set; }
+
     public static TranslatorConfig Load()
     {
         string jsonConfigPath = Path.Combine(AppContext.BaseDirectory, "config.json");
 
         if (!File.Exists(jsonConfigPath))
-            throw new FileNotFoundException("Config file not found.", jsonConfigPath);
+            throw new FileNotFoundException("Конфиг не найден.", jsonConfigPath);
 
         string jsonConfig = File.ReadAllText(jsonConfigPath);
 
-        var config = JsonSerializer.Deserialize(jsonConfig, SerializationConfig.Default.TranslatorConfig);
+        var config = JsonSerializer.Deserialize(jsonConfig, SerializationConfig.Default.TranslatorConfig)
+            ?? throw new InvalidOperationException("Ошибка при десериализации конфига.");
 
-        if (config == null)
-            throw new InvalidOperationException("Failed to deserialize the configuration file.");
+        ProxyManager.SetProxyIfNeeded(config);
 
         return config;
     }
+
 }
