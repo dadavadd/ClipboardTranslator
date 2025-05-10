@@ -80,7 +80,7 @@ public unsafe class WindowsClipboardMonitor : DisposableBase, IClipboardMonitor
             hInstance = GetModuleHandle((PCWSTR)null),
             lpszClassName = _className
         };
-
+        
         if (RegisterClassEx(in wcex) == 0)
             ThrowLastWin32Exception("Не удалось зарегистрировать класс окна");
     }
@@ -136,7 +136,7 @@ public unsafe class WindowsClipboardMonitor : DisposableBase, IClipboardMonitor
             }
             
             _ = ClipboardUpdate?.Invoke(text, _inputSimulator);
-
+            return (LRESULT)0;
         }
 
         return DefWindowProc(hwnd, msg, wParam, lParam);

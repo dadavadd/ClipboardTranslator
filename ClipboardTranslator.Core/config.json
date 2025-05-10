@@ -1,5 +1,5 @@
 {
-    "Proxy": "None", /* http://username:password@host:port или http://host:port или socks5://user:pass@host:port */
+    "Proxy": "None",
     "TranslationMode": "Ai",
     "GeminiOptions": {
         "ApiKey": "AIzaSyAuHk-p7AJt5ajGB36Ut8IHxVSw_G2ObO8",

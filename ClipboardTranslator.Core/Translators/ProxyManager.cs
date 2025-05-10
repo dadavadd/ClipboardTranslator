@@ -17,7 +17,7 @@ internal partial class ProxyManager
             return;
         }
 
-        if (!ProxyCheckRegex().Match(config.Proxy).Success)
+        if (!ProxyCheckRegex().Match(proxy).Success)
             throw new FormatException("Неверный формат прокси. Требуется: protocol://[user:pass@]host[:port]");
 
         var proxyUri = new Uri(proxy);

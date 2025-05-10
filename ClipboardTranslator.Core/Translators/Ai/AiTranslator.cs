@@ -43,15 +43,27 @@ public class AiTranslator(TranslatorConfig config,
 
         var stopWatch = Stopwatch.StartNew();
 
-        var translatorResponse = await _httpClient.PostAsJsonAsync(_translatorEndPoint,
-                                                                   requestBody,
-                                                                   SerializationConfig.Default.AiRequestBody, token);
+        try
+        {
+            var translatorResponse = await _httpClient.PostAsJsonAsync(_translatorEndPoint,
+                                                                       requestBody,
+                                                                       SerializationConfig.Default.AiRequestBody, token);
+            stopWatch.Stop();
 
-        stopWatch.Stop();
+            Log.Information("Ответ на запрос для перевода пришёл за {ElapsedMilliseconds} мс.", stopWatch.ElapsedMilliseconds);
 
-        Log.Information("Ответ на запрос для перевода пришёл за {ElapsedMilliseconds} мс.", stopWatch.ElapsedMilliseconds);
-
-        return translatorResponse;
+            return translatorResponse;
+        }
+        catch (HttpRequestException ex)
+        {
+            Log.Error(ex, "Ошибка сетевого соединения: {Message}", ex.Message);
+            throw new TranslatorException("Проблема с соединением к серверу перевода", ex);
+        }
+        catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
+        {
+            Log.Error(ex, "Таймаут запроса к API перевода");
+            throw new TranslatorException("Сервер перевода не ответил вовремя", ex);
+        }
     }
 
     private async Task<string> CheckResponseAsync(HttpResponseMessage response, CancellationToken token)
@@ -61,7 +73,7 @@ public class AiTranslator(TranslatorConfig config,
             var errorResponse = await response.Content.ReadAsStringAsync(token);
             Log.Warning("Ошибка при запросе к API: {StatusCode}", response.StatusCode);
             Log.Warning("Ответ с ошибкой: {errorResponse}", errorResponse);
-            throw new TranslatorException("Пустой ответ от API перевода.");
+            throw new TranslatorException($"Ошибка API перевода: {response.StatusCode}. {errorResponse}");
         }
 
         return await response.Content.ReadAsStringAsync(token);

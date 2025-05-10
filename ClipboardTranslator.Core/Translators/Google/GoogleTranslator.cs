@@ -39,13 +39,26 @@ public class GoogleTranslator(TranslatorConfig config,
 
         var stopWatch = Stopwatch.StartNew();
 
-        var response = await _httpClient.GetAsync(requestBody, token);
+        try
+        {
+            var response = await _httpClient.GetAsync(requestBody, token);
 
-        stopWatch.Stop();
+            stopWatch.Stop();
 
-        Log.Information("Ответ на запрос для перевода пришёл за {ElapsedMilliseconds} мс.", stopWatch.ElapsedMilliseconds);
+            Log.Information("Ответ на запрос для перевода пришёл за {ElapsedMilliseconds} мс.", stopWatch.ElapsedMilliseconds);
 
-        return response;
+            return response;
+        }
+        catch (HttpRequestException ex)
+        {
+            Log.Error(ex, "Ошибка сетевого соединения: {Message}", ex.Message);
+            throw new TranslatorException("Проблема с соединением к серверу перевода", ex);
+        }
+        catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
+        {
+            Log.Error(ex, "Таймаут запроса к API перевода");
+            throw new TranslatorException("Сервер перевода не ответил вовремя", ex);
+        }
     }
 
     private async Task<string> CheckResponseAsync(HttpResponseMessage response, CancellationToken token)
