@@ -19,12 +19,7 @@ public class TranslatorPlatformFactory
     public static ITextUpdater CreateClipboardMonitor(TranslatorConfig config, IInputSimulator inputSimulator, CancellationToken token)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            return config.TranslationInputMode switch
-            {
-                "Clipboard" => new WindowsClipboardMonitor(inputSimulator, config, token),
-                "CursorFocused" => new AutomationElementWindow(inputSimulator, config, token),
-                _ => throw new ArgumentException($"Неподдерживаемый режим ввода: {config.TranslationInputMode}")
-            };
+            return new WindowsClipboardMonitor(inputSimulator, config, token);
 
         //else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         //    return new LinuxClipboardMonitor(token);

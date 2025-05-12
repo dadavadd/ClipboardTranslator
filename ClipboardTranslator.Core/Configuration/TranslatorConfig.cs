@@ -24,9 +24,6 @@ public partial class TranslatorConfig
         var config = JsonSerializer.Deserialize(jsonConfig, SerializationConfig.Default.TranslatorConfig)
             ?? throw new InvalidOperationException("Ошибка при десериализации конфига.");
 
-        if (config.TranslationHotkey != "None" && config.TranslationInputMode == "CursorFocused")
-            throw new ArgumentException("TranslationHotkey не может быть установлен в None в режиме CursorFocused");
-
         ProxyManager.SetProxyIfNeeded(config);
 
         return config;

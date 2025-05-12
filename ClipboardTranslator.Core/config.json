@@ -2,7 +2,6 @@
   "Proxy": "None",
   "TranslationHotkey": "CTRL+B",
   "TranslationMode": "Ai",
-  "TranslationInputMode": "Clipboard",
   "GeminiOptions": {
     "ApiKey": "AIzaSyAuHk-p7AJt5ajGB36Ut8IHxVSw_G2ObO8",
     "ModelId": "gemini-2.0-flash",
