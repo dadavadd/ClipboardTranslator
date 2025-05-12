@@ -10,5 +10,4 @@ namespace ClipboardTranslator.Core.Configuration;
 [JsonSerializable(typeof(AiRequestBody))]
 [JsonSerializable(typeof(AiResponseBody))]
 [JsonSerializable(typeof(JsonElement))]
-
 internal partial class SerializationConfig : JsonSerializerContext;

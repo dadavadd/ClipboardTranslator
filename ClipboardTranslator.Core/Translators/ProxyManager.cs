@@ -11,21 +11,24 @@ internal partial class ProxyManager
     {
         var proxy = config.Proxy;
 
-        if (proxy == "None")
+        if (proxy.Equals("None", StringComparison.OrdinalIgnoreCase))
         {
             Log.Information("Прокси не используется.");
             return;
         }
 
-        if (!ProxyCheckRegex().Match(proxy).Success)
-            throw new FormatException("Неверный формат прокси. Требуется: protocol://[user:pass@]host[:port]");
-
         var proxyUri = new Uri(proxy);
-        HttpClient.DefaultProxy = new WebProxy(proxyUri);
+
+        try
+        {
+            HttpClient.DefaultProxy = new WebProxy(proxyUri);
+        }
+        catch (UriFormatException ex)
+        {
+            Log.Error(ex, "Неверный формат прокси. Требуется: protocol://[user:pass@]host[:port]");
+            throw;
+        }
 
         Log.Information("Прокси используется: {proxy}", proxyUri.Host);
     }
-
-    [GeneratedRegex(@"^(http|https|socks4|socks5)://([^:]+:[^@]+@)?([a-zA-Z0-9.-]+)(:\d+)?$", RegexOptions.IgnoreCase, "ru-RU")]
-    private static partial Regex ProxyCheckRegex();
 }

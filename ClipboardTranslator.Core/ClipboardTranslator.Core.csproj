@@ -26,4 +26,8 @@
     </None>
   </ItemGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="ClipboardTranslator.Tests" />
+	</ItemGroup>
+
 </Project>

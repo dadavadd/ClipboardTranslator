@@ -25,58 +25,48 @@ public class AiTranslator(TranslatorConfig config,
     public async Task<string?> TranslateAsync(string text)
     {
         token.ThrowIfCancellationRequested();
+        
         var requestBody = CreateRequestBody(text);
         using var translatorResponse = await SendRequestAsync(requestBody, token);
-        string responseStr = await CheckResponseAsync(translatorResponse, token);
+        string responseStr = await translatorResponse.Content.ReadAsStringAsync(token);
 
         var response = JsonSerializer.Deserialize(responseStr, SerializationConfig.Default.AiResponseBody)
-                      ?? throw new TranslatorException("Не удалось десериализовать ответ от API перевода.");
+            ?? throw new TranslatorException("Не удалось десериализовать ответ от API перевода.");
 
-        var result = response.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
+        var result = response.Candidates?
+            .FirstOrDefault()?
+            .Content?
+            .Parts?
+            .FirstOrDefault()?
+            .Text;
 
-        return !string.IsNullOrWhiteSpace(result) ? result : throw new TranslatorException($"Ответ от API перевода не содержит текста. Ответ: {responseStr}");
+        return !string.IsNullOrWhiteSpace(result) 
+            ? result 
+            : throw new TranslatorException(
+                $"Ответ от API перевода не содержит текста. Ответ: {responseStr}");
     }
 
     private async Task<HttpResponseMessage> SendRequestAsync(AiRequestBody? requestBody, CancellationToken token)
     {
-        Log.Information("Запрос для перевода отправлен.");
-
-        var stopWatch = Stopwatch.StartNew();
-
+        var response = await _httpClient.PostAsJsonAsync(_translatorEndPoint,
+                                                   requestBody,
+                                                   SerializationConfig.Default.AiRequestBody,
+                                                   token);
         try
         {
-            var translatorResponse = await _httpClient.PostAsJsonAsync(_translatorEndPoint,
-                                                                       requestBody,
-                                                                       SerializationConfig.Default.AiRequestBody, token);
-            stopWatch.Stop();
 
-            Log.Information("Ответ на запрос для перевода пришёл за {ElapsedMilliseconds} мс.", stopWatch.ElapsedMilliseconds);
+            response.EnsureSuccessStatusCode();
 
-            return translatorResponse;
+            return response;
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Ошибка сетевого соединения: {Message}", ex.Message);
-            throw new TranslatorException("Проблема с соединением к серверу перевода", ex);
+            throw new TranslatorException(await response.Content.ReadAsStringAsync(token), ex);
         }
         catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
         {
-            Log.Error(ex, "Таймаут запроса к API перевода");
             throw new TranslatorException("Сервер перевода не ответил вовремя", ex);
         }
-    }
-
-    private async Task<string> CheckResponseAsync(HttpResponseMessage response, CancellationToken token)
-    {
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorResponse = await response.Content.ReadAsStringAsync(token);
-            Log.Warning("Ошибка при запросе к API: {StatusCode}", response.StatusCode);
-            Log.Warning("Ответ с ошибкой: {errorResponse}", errorResponse);
-            throw new TranslatorException($"Ошибка API перевода: {response.StatusCode}. {errorResponse}");
-        }
-
-        return await response.Content.ReadAsStringAsync(token);
     }
 
     private AiRequestBody CreateRequestBody(string text)

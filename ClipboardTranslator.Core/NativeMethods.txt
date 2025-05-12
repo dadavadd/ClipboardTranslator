@@ -22,6 +22,8 @@ GetMessageW
 TranslateMessage
 DispatchMessageW
 DefWindowProcW
+RegisterHotKey
+UnregisterHotKey
 
 GetModuleHandle
 GetCurrentThreadId

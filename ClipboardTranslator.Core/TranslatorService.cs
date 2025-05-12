@@ -5,19 +5,16 @@ namespace ClipboardTranslator.Core;
 
 public class TranslatorService : IDisposable
 {
-    private readonly IClipboardMonitor _monitor;
+    private readonly ITextUpdater _monitor;
     private readonly ITranslator _translator;
 
     private bool _suppressClipboardUpdate;
 
-    public TranslatorService(IClipboardMonitor monitor,
-                      ITranslator translator,
-                      CancellationToken token = default)
+    public TranslatorService(ITextUpdater monitor, ITranslator translator)
     {
         _monitor = monitor;
         _translator = translator;
-
-        _monitor.ClipboardUpdate += OnClipboardUpdate;
+        _monitor.TextUpdate += OnClipboardUpdate;
     }
 
     private async Task OnClipboardUpdate(string text, IInputSimulator inputSimulator)

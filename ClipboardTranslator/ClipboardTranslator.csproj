@@ -27,10 +27,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Terminal.Gui" Version="2.0.0-prealpha.1895" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <ProjectReference Include="..\ClipboardTranslator.Core\ClipboardTranslator.Core.csproj" />
 	</ItemGroup>
 

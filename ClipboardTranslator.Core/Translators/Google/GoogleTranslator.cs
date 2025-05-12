@@ -35,57 +35,28 @@ public class GoogleTranslator(TranslatorConfig config,
 
     private async Task<HttpResponseMessage> GetRequestAsync(string requestBody, CancellationToken token)
     {
-        Log.Information("Запрос для перевода отправлен.");
-
-        var stopWatch = Stopwatch.StartNew();
-
         try
         {
-            var response = await _httpClient.GetAsync(requestBody, token);
-
-            stopWatch.Stop();
-
-            Log.Information("Ответ на запрос для перевода пришёл за {ElapsedMilliseconds} мс.", stopWatch.ElapsedMilliseconds);
-
-            return response;
+            return await _httpClient.GetAsync(requestBody, token);
         }
         catch (HttpRequestException ex)
         {
-            Log.Error(ex, "Ошибка сетевого соединения: {Message}", ex.Message);
             throw new TranslatorException("Проблема с соединением к серверу перевода", ex);
         }
         catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
         {
-            Log.Error(ex, "Таймаут запроса к API перевода");
             throw new TranslatorException("Сервер перевода не ответил вовремя", ex);
         }
     }
 
     private async Task<string> CheckResponseAsync(HttpResponseMessage response, CancellationToken token)
     {
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorResponse = await response.Content.ReadAsStringAsync(token);
-            Log.Warning("Ошибка при запросе к API: {StatusCode}", response.StatusCode);
-            Log.Warning("Ответ с ошибкой: {errorResponse}", errorResponse);
-            throw new TranslatorException("Пустой ответ от API перевода.");
-        }
-
+        response.EnsureSuccessStatusCode();
         return await response.Content.ReadAsStringAsync(token);
     }
 
-    private string GetResponseText(JsonElement element)
-    {
-        string translatedText = string.Empty;
-
-        foreach (var sentence in element[0].EnumerateArray())
-        {
-            if (sentence.ValueKind == JsonValueKind.Array && sentence.GetArrayLength() > 1)
-            {
-                translatedText += sentence[0].GetString();
-            }
-        }
-
-        return translatedText;
-    }
+    private string? GetResponseText(JsonElement element) =>
+        string.Concat(element[0].EnumerateArray()
+            .Where(s => s.ValueKind == JsonValueKind.Array && s.GetArrayLength() > 1)
+            .Select(s => s[0].GetString()));
 }

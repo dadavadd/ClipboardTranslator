@@ -1,4 +1,4 @@
-﻿using ClipboardTranslator.Core.ClipboardHandler.Windows;
+﻿using ClipboardTranslator.Core.TextUpdateHandler.Windows;
 using System.Runtime.InteropServices;
 using ClipboardTranslator.Core.Configuration;
 using ClipboardTranslator.Core.Interfaces;
@@ -16,10 +16,15 @@ public class TranslatorPlatformFactory
         _ => throw new NotSupportedException($"Транслятор {config.TranslationMode} не реализован.")
     };
 
-    public static IClipboardMonitor CreateClipboardMonitor(IInputSimulator inputSimulator, CancellationToken token)
+    public static ITextUpdater CreateClipboardMonitor(TranslatorConfig config, IInputSimulator inputSimulator, CancellationToken token)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            return new WindowsClipboardMonitor(inputSimulator, token);
+            return config.TranslationInputMode switch
+            {
+                "Clipboard" => new WindowsClipboardMonitor(inputSimulator, config, token),
+                "CursorFocused" => new AutomationElementWindow(inputSimulator, config, token),
+                _ => throw new ArgumentException($"Неподдерживаемый режим ввода: {config.TranslationInputMode}")
+            };
 
         //else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         //    return new LinuxClipboardMonitor(token);
