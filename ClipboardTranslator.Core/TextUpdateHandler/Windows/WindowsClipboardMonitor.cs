@@ -93,13 +93,6 @@ public unsafe class WindowsClipboardMonitor(IInputSimulator inputSimulator,
         return DefWindowProc(hwnd, msg, wParam, lParam);
     }
 
-    private void OnWmUpdate()
-    {
-        string text = _inputSimulator.GetClipboardText();
-        if (!string.IsNullOrWhiteSpace(text))
-            _ = TextUpdate?.Invoke(text, _inputSimulator);
-    }
-
     protected override void DisposeUnmanaged()
     {
         Log.Information("WindowsClipboardMonitor.DisposeUnmanaged вызван");
